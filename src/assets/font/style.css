@@ -1,0 +1,8 @@
+@font-face {
+  font-family: 'five';
+  src:  url('./five.ttf') format('truetype'),
+        url('./five.svg') format('svg'),
+        url('./five.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}

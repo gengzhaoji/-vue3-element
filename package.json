@@ -1,37 +1,42 @@
 {
-  "name": "ceshi",
-  "version": "0.1.0",
-  "private": true,
+  "name": "vite-project",
+  "version": "0.0.0",
   "scripts": {
-    "build": "vue-cli-service build",
-    "serve": "vue-cli-service serve --open",
-    "dev": "vue-cli-service serve --open",
-    "start": "vue-cli-service serve --open",
-    "dev:feng": "vue-cli-service serve --mode feng --open",
-    "dev:jia": "vue-cli-service serve --mode jia --open"
+    "dev": "vite --mode",
+    "build": "vite build",
+    "serve": "vite preview",
+    "coder": "node coder/index.js"
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "core-js": "^3.8.3",
-    "element-plus": "^1.0.2-beta.52",
+    "axios": "^0.21.4",
+    "countup.js": "^2.0.7",
+    "echarts": "^5.2.2",
+    "element-plus": "^1.1.0-beta.16",
+    "jsencrypt": "^3.2.1",
     "lodash": "^4.17.21",
     "mitt": "^3.0.0",
     "nprogress": "^0.2.0",
-    "vue": "^3.0.4",
+    "path-to-regexp": "^6.2.0",
+    "qs": "^6.10.3",
+    "sortablejs": "^1.14.0",
+    "three": "^0.133.1",
+    "vue": "^3.2.21",
+    "vue-cropper": "^1.0.2",
+    "vue-draggable-next": "^2.1.1",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.0",
-    "vuex-persistedstate": "^4.0.0-beta.3"
+    "vuex-persistedstate": "^4.1.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~5.0.0-beta.2",
-    "@vue/cli-plugin-router": "~5.0.0-beta.2",
-    "@vue/cli-plugin-vuex": "~5.0.0-beta.2",
-    "@vue/cli-service": "~5.0.0-beta.2",
-    "@vue/compiler-sfc": "^3.0.4",
-    "babel-plugin-import": "^1.13.3",
-    "babel-polyfill": "^6.26.0",
-    "compression-webpack-plugin": "^8.0.0",
-    "sass": "^1.32.7",
-    "sass-loader": "^8.0.2"
+    "@vitejs/plugin-legacy": "^1.6.0",
+    "@vitejs/plugin-vue": "^1.9.2",
+    "@vue/compiler-sfc": "^3.2.6",
+    "js-beautify": "^1.14.0",
+    "sass": "^1.42.1",
+    "unplugin-vue-components": "^0.17.8",
+    "vite": "^2.6.10",
+    "vite-plugin-babel-import": "^2.0.5",
+    "vite-plugin-compression": "^0.3.5",
+    "vite-plugin-html": "^2.1.1"
   }
 }

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="default">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+        <link rel="icon" href="/favicon.ico" />
+        <!-- <script src="/config.js"></script> -->
+        <%- injectAMapScript %>
+        <title><%- title %></title>
+
+        <style type="text/css">
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                -webkit-text-size-adjust: none;
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+                font-size: 14px;
+                line-height: 1.5em;
+                -moz-osx-font-smoothing: grayscale;
+                -webkit-font-smoothing: antialiased;
+                text-rendering: optimizeLegibility;
+                font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+                background: #fff;
+                color: #303133;
+                min-width: 1024px;
+            }
+
+            #app {
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            #loader-wrapper {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 999999;
+                background: #7171c6;
+                font-size: 18px;
+            }
+
+            #loader {
+                line-height: 150px;
+                color: #fff;
+                text-align: center;
+                display: block;
+                position: relative;
+                left: 50%;
+                top: 50%;
+                width: 150px;
+                height: 150px;
+                margin: -75px 0 0 -75px;
+                border-radius: 50%;
+                border: 3px solid transparent;
+                border-top-color: #fff;
+                -webkit-animation: spin 2s linear infinite;
+                -ms-animation: spin 2s linear infinite;
+                -moz-animation: spin 2s linear infinite;
+                -o-animation: spin 2s linear infinite;
+                animation: spin 2s linear infinite;
+                z-index: 1001;
+            }
+
+            #loader:before {
+                content: '';
+                position: absolute;
+                top: 5px;
+                left: 5px;
+                right: 5px;
+                bottom: 5px;
+                border-radius: 50%;
+                border: 3px solid transparent;
+                border-top-color: #fff;
+                -webkit-animation: spin 3s linear infinite;
+                -moz-animation: spin 3s linear infinite;
+                -o-animation: spin 3s linear infinite;
+                -ms-animation: spin 3s linear infinite;
+                animation: spin 3s linear infinite;
+            }
+
+            #loader:after {
+                content: '';
+                position: absolute;
+                top: 15px;
+                left: 15px;
+                right: 15px;
+                bottom: 15px;
+                border-radius: 50%;
+                border: 3px solid transparent;
+                border-top-color: #fff;
+                -moz-animation: spin 1.5s linear infinite;
+                -o-animation: spin 1.5s linear infinite;
+                -ms-animation: spin 1.5s linear infinite;
+                -webkit-animation: spin 1.5s linear infinite;
+                animation: spin 1.5s linear infinite;
+            }
+
+            @-webkit-keyframes spin {
+                0% {
+                    -webkit-transform: rotate(0deg);
+                    -ms-transform: rotate(0deg);
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    -webkit-transform: rotate(360deg);
+                    -ms-transform: rotate(360deg);
+                    transform: rotate(360deg);
+                }
+            }
+
+            @keyframes spin {
+                0% {
+                    -webkit-transform: rotate(0deg);
+                    -ms-transform: rotate(0deg);
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    -webkit-transform: rotate(360deg);
+                    -ms-transform: rotate(360deg);
+                    transform: rotate(360deg);
+                }
+            }
+
+            #loader-wrapper .load_title {
+                color: #fff;
+                width: 100%;
+                text-align: center;
+                z-index: 9999999999999;
+                position: absolute;
+                top: calc(50% + 90px);
+                opacity: 1;
+                line-height: 30px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <noscript>
+            <strong>We're sorry but vue3 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+        </noscript>
+        <div id="app">
+            <div id="loader-wrapper">
+                <div id="loader">加载中...</div>
+                <div class="load_title">正在加载系统资源，请耐心等待</div>
+            </div>
+        </div>
+    </body>
+    <script type="module" src="/src/main.js"></script>
+</html>

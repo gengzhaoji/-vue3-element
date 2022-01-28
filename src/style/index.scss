@@ -1,199 +1,77 @@
 // 通用基础样式
-@import "base";
-@import "scrollbar";
-@import 'transition';
-@import 'validate';
+@import 'base.scss';
+@import 'scrollbar.scss';
+@import 'transition.scss';
+@import 'validate.scss';
+@import 'flex.scss';
+@import 'themes.scss';
+@import 'ui.scss';
 
-.el-dropdown-link {
-    cursor: pointer;
-    color: #409eff;
-}
-
-.el-icon-arrow-down {
-    font-size: 12px;
-}
-
-.el-table {
-    color: #606266;
-
-    thead {
-        color: #000000;
-    }
-
-    th {
-        background: #ebf1f5;
-    }
-}
-
-.el-tabs__item:focus.is-active.is-focus:not(:active) {
-    box-shadow: none;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-}
-
-.el-tabs__item {
-    font-size: 16px;
-}
-
-.el-divider--horizontal {
-    margin: 5px 0;
-}
-
-.horizontal-collapse-transition {
-    transition: 0s width ease-in-out, 0s padding-left ease-in-out, 0s padding-right ease-in-out;
-}
-
-.el-breadcrumb {
-    font-size: 16px;
-}
-
-.caozuo+.caozuo {
-    >span {
-        border-left: 1px solid #409eff;
-        padding-left: 10px;
-    }
-}
-
-.el-icon-g-img {
-    margin-right: 10px !important;
-    width: 18px !important;
-}
-
-.el-upload {
-    width: 100%;
-
-    .el-upload-dragger {
-        width: 100%;
-    }
-}
-
-.el-cascader {
-    width: 100%;
-}
-
-.el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content {
-    background-color: #f0f7ff;
-    color: #409eff;
-}
-
-.el-tree--highlight-current .el-tree-node__content {
-    &:hover {
-        background-color: #f0f7ff;
-        color: #409eff;
-    }
-}
-
-.el-tree-node__expand-icon {
-    color: #000;
-}
-
-.el-cascader-menu__empty-text {
-    position: relative;
-    top: 0;
-    left: 0;
-    transform: translate(0%, 0%);
-    text-align: center;
-    color: #C0C4CC;
-}
-
-.el-dialog__header {
-    background: #D1D1D1;
-
-    .el-dialog__title {
-        font-weight: bolder;
-    }
-
-    .el-dialog__headerbtn .el-dialog__close {
-        color: #000000;
-        font-weight: bold;
-    }
-}
-
-.el-submenu__title i,
-.el-menu-item i {
-    color: #303133;
-}
-
-.el-input-group__append {
-    .el-form-item {
-        margin-bottom: -2px;
-    }
-}
-
-.el-input-number {
-    width: 100%;
-}
-
-// 级联选择框
-.el-cascader-panel .el-radio {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    right: 0px;
-    top: 0;
-}
-
-.el-cascader-panel .el-radio__input {
-    visibility: hidden;
-}
-
-.el-cascader-panel .el-cascader-node__postfix {
-    top: 10px;
-}
-
-.el-cascader-menu__list {
-    max-height: 400px;
-}
-
-.el-select .el-input__inner {
-    padding-right: 30px;
-}
-
-.fw {
-    font-weight: bold;
-}
-
-.f1 {
-    flex-grow: 1;
-    flex-shrink: 0;
-    flex-basis: auto;
-}
-
-.h0 {
-    height: 0;
-}
-
-.overflow-auto {
-    overflow: auto;
-}
-
-:focus {
-    outline: none;
-}
-
-.back-f {
-    background: #ffffff;
-}
-
-.back-gainsboro {
-    background-color: gainsboro;
-}
-
-.index {
+// 自定义常用样式
+.page {
     height: 100%;
     display: flex;
     flex-direction: column;
     position: relative;
-    overflow: auto;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
-.border_title {
-    border-bottom: 1px solid #DCDFE6;
+.system-page-background {
+    background-color: var(--system-page-background);
+}
+
+.caozuo + .caozuo {
+    > span {
+        border-left: 1px solid #e6e9f4;
+        padding-left: 10px;
+    }
+}
+
+.p-card {
+    background-color: #fff;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    .card-header {
+        font-size: 16px;
+        height: 32px;
+        line-height: 32px;
+        font-weight: 700;
+        padding-left: 5px;
+    }
+}
+
+.card-header {
     font-size: 16px;
+    height: 36px;
+    line-height: 36px;
+    font-weight: 700;
 }
 
-.top_title {
-    font-size: 18px;
-    color: #1890ff;
+.title {
+    color: #3a3f63;
+    font-size: 16px;
+    font-weight: 700;
+    height: 30px;
+    line-height: 30px;
+    box-sizing: content-box;
+}
+
+.b-divider {
+    border-bottom: 1px solid #dcdfe6;
+}
+
+.message-hight-light {
+    color: #ff3c65;
     font-weight: bold;
+}
+
+.top-title {
+    color: #3a3f63;
+    font-size: 20px;
+    height: 30px;
+    line-height: 30px;
+    font-weight: 600;
+    padding-bottom: 10px;
 }

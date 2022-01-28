@@ -1,16 +1,11 @@
 <template>
-    <el-button
-        ref='elButton'
-        v-preventReClick
-        v-bind="$attrs"
-        :size='$attrs.size || $store.getters.size'
-    >
+    <el-button ref="elButton" :size="$store.state.user.size" v-bind="$attrs">
         <slot></slot>
     </el-button>
 </template>
- 
+
 <script>
 export default {
-  name: "com-button"
+    name: 'com-button',
 };
 </script>

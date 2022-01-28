@@ -1,0 +1,304 @@
+// 通用ui整体调整
+.el-header {
+    --el-header-padding: 0;
+    --el-header-height: 60px;
+}
+
+.el-drawer__header {
+    outline: none;
+    color: #000 !important;
+    font-size: 24px;
+
+    .el-drawer__close-btn > .el-icon {
+        font-size: 20px;
+    }
+}
+
+// 菜单部分
+.el-menu {
+    --el-menu-item-font-size: var(--el-font-size-medium);
+
+    border-right: 0;
+    // .el-menu-item {
+    //     height: 44px;
+    //     line-height: 44px;
+    //     border-radius: 8px;
+    //     min-width: 180px;
+    // }
+    // .el-menu-item.is-active,
+    // .el-submenu__title.is-active {
+    //     background: linear-gradient(45deg, #4f8aff 0%, #4b5eff 100%);
+    // }
+
+    // .el-sub-menu__title {
+    //     height: 50px;
+    //     line-height: 50px;
+    //     border-radius: 8px;
+    // }
+
+    .el-menu--horizontal {
+        height: 70px;
+        border-bottom: 0;
+        & > .el-sub-menu .el-sub-menu__title {
+            height: 70px;
+            line-height: 70px;
+        }
+        & > .el-menu-item {
+            height: 70px;
+        }
+        & > .el-sub-menu.is-active .el-sub-menu__title {
+            border-bottom: 4px solid var(--el-menu-active-color);
+        }
+    }
+
+    #both.el-menu--horizontal > .el-menu-item.is-active {
+        background-color: transparent !important;
+        border-bottom: 4px solid #1890ff;
+    }
+
+    .el-dropdown-link {
+        cursor: pointer;
+        color: var(--system-primary-color);
+    }
+
+    .el-icon-arrow-down {
+        font-size: 12px;
+    }
+
+    .el-sub-menu,
+    .el-menu-item {
+        [class^='icon-'],
+        [class^='el-icon-'] {
+            font-size: 18px;
+            margin-right: 10px;
+            width: 24px;
+            text-align: center;
+            vertical-align: sub;
+        }
+    }
+}
+.el-menu--collapse {
+    .el-sub-menu,
+    .el-menu-item {
+        [class^='icon-'],
+        [class^='el-icon-'] {
+            font-size: 24px;
+            margin: 0;
+        }
+    }
+}
+
+// form表单的问题
+@media screen and (max-width: 1920px) {
+    .query {
+        margin-bottom: -18px !important;
+    }
+    .el-form {
+        margin-bottom: 0;
+    }
+}
+
+@media screen and (min-width: 1921px) {
+    .query {
+        margin-bottom: -22px !important;
+    }
+    .el-form {
+        margin-bottom: 0;
+    }
+}
+
+// form表单
+.el-select,
+.el-cascader,
+.el-input-number {
+    width: 100%;
+}
+
+.el-form--label-top .el-form-item__label {
+    padding: 0;
+}
+
+// 表格高度自适应
+.el-table {
+    flex: 1;
+}
+
+// bialog
+.el-dialog {
+    --el-dialog-padding-primary: 10px !important;
+    --el-dialog-padding-primary: 15px !important;
+    border-radius: var(--el-border-radius-base) !important;
+    .el-dialog__header {
+        border-bottom: 1px solid #f5f5fa;
+        .el-dialog__title {
+            font-weight: 600;
+        }
+    }
+}
+
+.el-message-box__header {
+    .el-dialog__header {
+        border-bottom: 1px solid var(--el-color-primary);
+        .el-dialog__title {
+            font-weight: bolder;
+        }
+        .el-dialog__headerbtn {
+            font-size: 20px;
+            .el-dialog__close {
+                font-size: 18px;
+            }
+        }
+    }
+    .el-dialog__footer {
+        border-top: 1px dashed var(--el-color-primary);
+    }
+
+    .el-message-box__header {
+        border-bottom: 1px solid var(--el-color-primary);
+    }
+    .el-dialog__body {
+        padding: var(--el-dialog-padding-primary) !important;
+    }
+}
+
+// 级联选择框(单选)
+.el-cascader-panel {
+    .el-radio {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        right: 0px;
+        top: 0;
+    }
+
+    .el-radio__input {
+        visibility: hidden;
+    }
+
+    .el-cascader-node__postfix {
+        top: 10px;
+    }
+
+    .el-cascader-menu__list {
+        max-height: 400px;
+    }
+}
+
+.el-select .el-input__inner {
+    padding-right: 30px;
+}
+
+.el-radio-button__inner {
+    color: #4458fe;
+    font-weight: 700;
+}
+
+// 按钮部分
+.el-button--primary {
+    --el-button-font-color: #ffffff;
+    --el-button-background-color: var(--system-primary-color);
+    --el-button-border-color: var(--system-primary-color);
+    --el-button-hover-color: #66b1ff;
+    --el-button-active-font-color: #e6e6e6;
+    --el-button-active-background-color: #0d84ff;
+    --el-button-active-border-color: #0d84ff;
+}
+
+// 表格
+.el-table__body,
+.el-table__footer,
+.el-table__empty-block,
+.el-table__header {
+    width: 100% !important;
+}
+
+// 抽屉
+.el-drawer {
+    --el-drawer-background-color: var(--el-dialog-background-color, var(--el-color-white));
+    --el-drawer-padding-primary: var(--el-dialog-padding-primary, 20px);
+    .el-drawer__body {
+        background-color: var(--system-container-background);
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        flex: 1;
+        height: 0;
+    }
+    .el-drawer__header {
+        margin-bottom: 20px;
+        font-size: 18px;
+        font-weight: 900;
+        margin-bottom: 0;
+        font-size: 18px;
+        font-weight: 900;
+        border-bottom: 1px solid var(--el-button-border-color, var(--el-border-color-base));
+        padding-bottom: var(--el-drawer-padding-primary);
+    }
+}
+
+// 标签
+.el-tabs__item {
+    font-size: 16px;
+    .is-active {
+        font-weight: bold;
+    }
+}
+
+.el-page-header__left {
+    margin-right: 20px !important;
+    color: var(--el-color-primary);
+    transition: all 0.3s;
+    .el-page-header__icon {
+        margin-right: 0px;
+    }
+    .el-page-header__title {
+        font-size: 16px;
+    }
+    &::after {
+        right: -10px !important;
+        transform: translateY(-50%) rotate(19deg) !important;
+        background-color: var(--el-color-primary) !important;
+    }
+    &:hover {
+        transform: translateX(-5px);
+    }
+}
+.el-page-header__content {
+    font-weight: 900;
+}
+.el-popover.proppper-class {
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0px 4px 16px 0px rgba(179, 192, 231, 0.32);
+    padding: 12px 0 0 0;
+}
+
+// button
+.el-button--secret {
+    color: #4458fe;
+    background: #ffffff;
+    border: none;
+    box-shadow: 0px 4px 16px 0px rgba(179, 192, 231, 0.32);
+    border-radius: 27px;
+    font-weight: 700;
+    &:not(.is-disabled):hover,
+    &:not(.is-disabled):active {
+        color: #71a0fe !important;
+    }
+    &.is-disabled {
+        background: #dae0f2 !important;
+        color: #858ebd !important;
+    }
+}
+.el-button--primary_1 {
+    color: #ffffff;
+    background: linear-gradient(45deg, #4f8aff 0%, #4b5eff 100%);
+    box-shadow: 0px 4px 16px 0px #b3c0e7;
+    border-radius: 4px;
+    &:hover,
+    &:active,
+    &:focus {
+        background: linear-gradient(45deg, #71a0fe 0%, #71a0fe 100%);
+        color: #ffffff !important;
+    }
+}

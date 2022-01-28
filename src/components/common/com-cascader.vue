@@ -1,122 +1,104 @@
 <template>
-  <el-cascader
-    ref='cascader'
-    v-model="fieldValue"
-    v-bind="$attrs"
-    :options="options"
-    :props="props"
-    :show-all-levels="showAllLevels"
-    :filterable='filterable'
-    :clearable='clearable'
-    :size='$attrs.size || $store.getters.size'
-  ></el-cascader>
+    <el-cascader
+        ref="cascader"
+        v-model="fieldValue"
+        :options="options"
+        :props="{
+            expandTrigger: 'hover',
+            value: 'id',
+            emitPath: false,
+            checkStrictly: true,
+        }"
+        :show-all-levels="false"
+        filterable
+        clearable
+        :size="$store.state.user.size"
+        @change="cascaderChange"
+        v-bind="$attrs"
+    />
 </template>
- 
-<script>
-import { mapGetters } from "vuex";
 
+<script>
 export default {
-  name: "com-cascader",
-  /***
-   * 参数属性
-   * @property {Object[]} value 默认值
-   */
-  model: {
-    prop: "value", // 自定义prop属性
-    event: "fieldValue" // 自定义它的触发方法名
-  },
-  props: {
-    type: "",
-    value: null,
+    name: 'com-cascader',
+    emits: ['update:modelValue', 'getLabel'],
     props: {
-      default: function() {
+        type: '',
+        modelValue: null,
+        list: {
+            type: Array,
+            default: () => [],
+        },
+    },
+    data() {
         return {
-          expandTrigger: "hover",
-          value: "id",
-          emitPath: false,
-          checkStrictly: true
+            options: [],
+            catchDispatch: false,
         };
-      }
     },
-    showAllLevels: {
-      default: false
+    computed: {
+        /**
+         * 多个同一请求同一时间在执行时被取消的逻辑
+         * this.$store.state.com[this.type.replace("Get", "")]获取最前面执行的那一个请求的结果 因为可能为数组所以使用watch监听赋值
+         */
+        catchOptions() {
+            if (this.catchDispatch) {
+                return this.$store.state.com[this.type.replace('Get', '')];
+            } else {
+                return [];
+            }
+        },
+        fieldValue: {
+            get() {
+                return this.modelValue;
+            },
+            set(val) {
+                this.$refs.cascader.popperVisible = false;
+                this.$emit('update:modelValue', val);
+            },
+        },
     },
-    filterable: {
-      default: true
+    watch: {
+        list: {
+            handler(val) {
+                this.options = val;
+            },
+            deep: true,
+            immediate: true,
+        },
+        /**
+         * 监听computed所返回的数组数据--并赋值
+         */
+        catchOptions: {
+            handler(val) {
+                if (this.catchDispatch) {
+                    this.options = val;
+                }
+            },
+            deep: true,
+        },
     },
-    list: {
-      type: Array,
-      default: () => []
+    methods: {
+        cascaderChange(item) {
+            this.$emit('getLabel', this.$refs.cascader.getCheckedNodes()[0]?.label || '');
+        },
     },
-    clearable: {
-      type: Boolean,
-      default: true
-    }
-  },
-  data() {
-    return {
-      options: [],
-      catchDispatch: false
-    };
-  },
-  computed: {
-    /**
-     * 多个同一请求同一时间在执行时被取消的逻辑
-     * this.$store.getters[this.type.replace("Get", "")]获取最前面执行的那一个请求的结果 因为可能为数组所以使用watch监听赋值
-     */
-    catchOptions() {
-      if (this.catchDispatch) {
-        return this.$store.getters[this.type.replace("Get", "")];
-      } else {
-        return [];
-      }
-    },
-    fieldValue: {
-      get() {
-        return this.value;
-      },
-      set(val) {
-        this.$refs.cascader.dropDownVisible = false;
-        this.$emit("fieldValue", val);
-      }
-    }
-  },
-  watch: {
-    list: {
-      handler(val) {
-        this.options = val;
-      },
-      deep: true,
-      immediate: true
-    },
-    /**
-     * 监听computed所返回的数组数据--并赋值
-     */
-    catchOptions: {
-      handler(val) {
-        if (this.catchDispatch) {
-          this.options = val;
+    created() {
+        /**
+         * GetnameList 用户树
+         * GetdeptList 部门数
+         * GeteqptNameTree 设备树
+         */
+        if (this.type) {
+            this.$store
+                .dispatch(this.type)
+                .then((data) => {
+                    this.options = data;
+                })
+                .catch(() => {
+                    this.catchDispatch = true;
+                });
         }
-      },
-      deep: true
-    }
-  },
-  created() {
-    /**
-     * GetnameList 用户树
-     * GetdeptList 部门数
-     * GeteqptNameTree 设备树
-     */
-    if (this.type) {
-      this.$store
-        .dispatch(this.type)
-        .then(data => {
-          this.options = data;
-        })
-        .catch(() => {
-          this.catchDispatch = true;
-        });
-    }
-  }
+    },
 };
 </script>

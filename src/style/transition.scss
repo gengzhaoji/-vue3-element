@@ -6,46 +6,73 @@ v-enter改成了v-enter-form，v-leave改成了v-leave-from。
 /* fade */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.28s;
+    transition: opacity 0.3s;
 }
 
 .fade-enter-from,
 .fade-leave-active {
-  opacity: 0;
+    opacity: 0;
 }
 
-/* fade-transform */
-.fade-transform-leave-active,
+// 整体项目切换动画
 .fade-transform-enter-active {
-  transition: all .5s;
+    animation: fade-transform-in 0.3s ease-out;
+}
+.fade-transform-leave-active {
+    animation: fade-transform-out 0.3s ease-out;
+}
+/* 想要让动画平滑一点，需要加v-move的类名，v-可以别name的值 */
+.fade-transform-move {
+    transition: all 0.3s ease-out;
 }
 
-.fade-transform-enter {
-  opacity: 0;
-  transform: translateX(-30px);
+@keyframes fade-transform-in {
+    from {
+        transform: translateX(-40px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+    }
 }
-
-.fade-transform-leave-to {
-  opacity: 0;
-  transform: translateX(30px);
+@keyframes fade-transform-out {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(40px);
+        opacity: 0;
+    }
 }
 
 /* breadcrumb transition */
 .breadcrumb-enter-active,
 .breadcrumb-leave-active {
-  transition: all .5s;
+    transition: all 0.3s;
 }
 
 .breadcrumb-enter-from,
 .breadcrumb-leave-active {
-  opacity: 0;
-  transform: translateX(20px);
+    opacity: 0;
+    transform: translateX(20px);
 }
 
 .breadcrumb-move {
-  transition: all .5s;
+    transition: all 0.3s;
 }
 
 .breadcrumb-leave-active {
-  position: absolute;
+    position: absolute;
+}
+// logo切换动画
+.sidebarLogoFade-enter-active {
+    transition: opacity 1.5s;
+}
+
+.sidebarLogoFade-enter-from,
+.sidebarLogoFade-leave-to {
+    opacity: 0;
+}
+.fsidebarLogoFade-move {
+    transition: all 0.3s ease-out;
 }

@@ -1,5 +1,5 @@
 export default {
-    inserted(el, binding) {
+    mounted(el, binding) {
         el.addEventListener('click', () => {
             if (!el.disabled) {
                 el.disabled = true;
@@ -7,8 +7,8 @@ export default {
                 setTimeout(() => {
                     el.className = el.className.replace(' is-disabled', '');
                     el.disabled = false;
-                }, binding.value || 500)
+                }, binding.value || 500);
             }
-        })
-    }
-}
+        });
+    },
+};
