@@ -3,14 +3,14 @@
  * @module utils/events
  */
 
-import { on, off } from 'element-plus/lib/utils/dom';
+import { on, off } from 'dom';
 import bus from '@/utils/bus';
 
 /**
  * 事件处理基类
  * @export
  */
-class Events {
+export default class Events {
     /**
      * @constructor
      */
@@ -22,7 +22,7 @@ class Events {
          * @property  {HtmlElement} handler.el DOM元素
          * @property {String} handler.eventName 事件名称，如: click、mouseenter、keydown
          * @property {Function} handler.callback 事件回调函数
-         * @property {Function} handler.proxy 时间回调函数代理，更换了作用域this指向当前实例
+         * @property {Function} handler.proxy 事件回调函数代理，更换了作用域this指向当前实例
          */
         this.__handlers__ = [];
 
@@ -121,9 +121,3 @@ class Events {
         this.__event__.$destroy();
     }
 }
-
-/**
- * 事件基类
- * @type {Events}
- */
-export default Events;

@@ -3,13 +3,13 @@
  * @module utils/directives/hasPermi
  */
 
-import store from '@/store';
+import user from '@/store/user';
 
 export default {
     mounted(el, binding, vnode) {
         const { value } = binding;
         const all_permission = '*:*:*';
-        const permissions = store.getters?.permissions;
+        const permissions = user().permissionsGets;
 
         if (value && value instanceof Array && value.length > 0) {
             const permissionFlag = value;

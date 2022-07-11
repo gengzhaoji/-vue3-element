@@ -1,153 +1,140 @@
 <template>
     <div class="page">
-        <div class="top-title">配置管理</div>
         <div class="p-10 system-page-background b-r-4">
-            <com-form
+            <my-form
                 inline
                 query
                 label-width="70px"
                 :model="queryParams"
                 :formItem="[
-                    { prop: 'likeConfigName', label: '参数名称' },
+                    { prop: 'likeConfigName', label: '配置名称' },
                     { prop: 'likeConfigKey', label: '参数键值' },
                 ]"
-                @searchFn="$refs.table.reload()"
-                @resetFn="$refs.table.reload()"
+                @searchFn="refTable.reload()"
+                @resetFn="refTable.reload()"
             />
         </div>
         <div class="f1 h0 flex-col system-page-background m-t-10 b-r-4">
             <div class="p-10" v-hasPermi="['secrecy:config:add', 'secrecy:config:remove']">
-                <com-button plain class="el-button--secret" @click="insertFn" icon="el-icon-plus" v-hasPermi="['secrecy:config:add']">新 增</com-button>
-                <com-button plain class="el-button--secret" :disabled="!tableSelection.length" @click="deleteFn()" icon="el-icon-delete" v-hasPermi="['secrecy:config:remove']">
-                    删 除
-                </com-button>
+                <my-button type="primary" @click="insertFn()" icon="Plus" v-hasPermi="['secrecy:config:add']">新 增 </my-button>
+                <my-button type="danger" v-show="tableSelection.length" @click="deleteFn(tableSelection)" icon="Delete" v-hasPermi="['secrecy:config:remove']"> 删 除 </my-button>
             </div>
             <div class="f1 h0 flex-col">
-                <xdh-list-panel ref="table" :total="state.total" :loadFn="loadData">
-                    <xdh-table ref="xdhTable" :data="state.list" :columns="state.columns" @selection-change="(val) => (tableSelection = val)">
-                        <template #index="{ $index }">
-                            {{ $index + 1 + ($refs.table.currentPage - 1) * $refs.table.pageSize }}
-                        </template>
-                        <template #configType="{ row }"> {{ selectDictLabel($store.state.dict.sysYesNo, row.configType) }} </template>
+                <my-list-panel ref="refTable" :total="state.total" :loadFn="loadData">
+                    <my-table :data="state.list" :columns="state.columns" @selection-change="(val) => (tableSelection = val)">
+                        <template #configType="{ row }"> {{ selectDictLabel($store.dict.sysYesNo, row.configType) }} </template>
                         <template #default="{ row }">
-                            <com-button type="text" class="caozuo" @click="detailFn(row)">查看</com-button>
-                            <com-button type="text" class="caozuo" @click="updateFn(row)" v-hasPermi="['secrecy:config:edit']">修改</com-button>
-                            <com-button type="text" class="caozuo" @click="deleteFn(row)" v-hasPermi="['secrecy:config:remove']">删除</com-button>
+                            <my-button-text @click="detailFn(row)">查看</my-button-text>
+                            <my-button-text @click="updateFn(row)" v-hasPermi="['secrecy:config:edit']">修改</my-button-text>
+                            <my-button-text @click="deleteFn(row)" v-hasPermi="['secrecy:config:remove']">删除</my-button-text>
                         </template>
-                    </xdh-table>
-                </xdh-list-panel>
+                    </my-table>
+                </my-list-panel>
             </div>
         </div>
         <!-- 添加或修改部门对话框 -->
-        <el-dialog :title="dialogTitle" v-model="dialog.open" width="500px" append-to-body @closed="resetForm('dialogForm')">
-            <com-form
-                ref="dialogForm"
+        <el-dialog :title="dialogTitle" v-model="dialog.open" width="500px" append-to-body @close="resetForm(refDialogFrom)">
+            <my-form
+                ref="refDialogFrom"
                 :model="dialog.form"
                 label-width="80px"
                 :disabled="['detail'].includes(dialog.name)"
                 :formItem="[
                     { prop: 'configName', label: '参数名称', required: true },
-                    { prop: 'configKey', label: '参数键值', required: true },
+                    { prop: 'configKey', label: '参数键值', required: true, disabled: dialog.name === 'update' },
                     { prop: 'configValue', label: '参数值', required: true },
                     {
                         itemType: 'select',
                         prop: 'configType',
                         label: '系统内置',
-                        list: $store.state.dict.sysYesNo,
+                        list: $store.dict.sysYesNo,
                     },
                     { prop: 'remark', label: '备注', type: 'textarea' },
                 ]"
-            />
+            >
+                <template #configValue="{ model, prop }">
+                    <el-input v-model="model[prop]" placeholder="请输入参数值" clearable :size="$store.user.size" />
+                </template>
+            </my-form>
             <template #footer>
                 <div class="dialog-footer">
-                    <com-button type="primary" @click.prevent="dialogSubmitFn()"> 确 定 </com-button>
-                    <com-button @click.prevent="cancel()">取 消</com-button>
+                    <my-button type="primary" @click.prevent="dialogSubmitFn()"> 确 定 </my-button>
+                    <my-button @click.prevent="dialog.open = false">取 消</my-button>
                 </div>
             </template>
         </el-dialog>
     </div>
 </template>
 
-<script>
-import { addConfig, removeConfig, editConfig, infoConfig, pageConfig } from '@/api/system';
+<script setup name="config">
+import { addConfig, removeConfig, editConfig, pageConfig } from '@/api/system';
 import mixin from '@/utils/mixin';
 
-export default {
-    name: 'config',
-    mixins: [mixin],
-    data() {
-        this.pageConfig = {
-            api: {
-                page: pageConfig,
-                info: infoConfig,
-                remove: removeConfig,
-                add: addConfig,
-                edit: editConfig,
+let queryParams = $ref({
+        likeConfigName: '',
+        likeConfigKey: '',
+    }),
+    state = $ref({
+        total: 0,
+        list: [],
+        columns: [
+            {
+                type: 'selection',
             },
-            id: 'id',
-        };
-        return {
-            // 查询参数
-            queryParams: {
-                likeConfigName: '',
-                likeConfigKey: '',
+            {
+                label: '配置名称',
+                prop: 'configName',
             },
-            state: {
-                total: 0,
-                list: [],
-                columns: [
-                    {
-                        type: 'selection',
-                    },
-                    {
-                        label: '配置名称',
-                        prop: 'configName',
-                    },
-                    {
-                        label: '参数键值',
-                        prop: 'configKey',
-                    },
-                    {
-                        label: '参数值',
-                        prop: 'configValue',
-                    },
-                    {
-                        label: '系统内置',
-                        prop: 'configType',
-                        width: 80,
-                    },
-                    {
-                        label: '创建时间',
-                        prop: 'createTime',
-                        width: 150,
-                    },
-                    {
-                        label: '备注',
-                        prop: 'remark',
-                    },
-                    {
-                        label: '操作',
-                        width: '200',
-                    },
-                ],
+            {
+                label: '参数键值',
+                prop: 'configKey',
             },
-            loading: false,
-            // 弹出层
-            dialog: {
-                title: '参数配置',
-                open: false,
-                form: {
-                    configName: '',
-                    configKey: '',
-                    configValue: '',
-                    configType: '',
-                    remark: '',
-                },
+            {
+                label: '参数值',
+                prop: 'configValue',
             },
-        };
-    },
-    created() {
-        this.$store.dispatch('GETsysYesNo');
-    },
-};
+            {
+                label: '系统内置',
+                prop: 'configType',
+                width: 80,
+            },
+            {
+                label: '创建时间',
+                prop: 'createTime',
+                width: 160,
+            },
+            {
+                label: '备注',
+                prop: 'remark',
+            },
+            {
+                label: '操作',
+                width: '200',
+            },
+        ],
+    }),
+    // 弹出层
+    dialog = $ref({
+        title: '参数配置',
+        open: false,
+        name: '',
+        form: {
+            id: undefined,
+        },
+    });
+
+const refTable = $ref(null),
+    refDialogFrom = $ref(null);
+
+let tableSelection = $ref([]);
+const { $vm, dialogTitle, loadData, insertFn, deleteFn, updateFn, detailFn, dialogSubmitFn } = mixin({
+    queryParams,
+    state,
+    api: { page: pageConfig, remove: removeConfig, add: addConfig, edit: editConfig },
+    dialog,
+    refTable: () => refTable,
+    refDialogFrom: () => refDialogFrom,
+});
+// 初始化执行逻辑
+$vm.$store.dict.GETsysYesNo();
 </script>

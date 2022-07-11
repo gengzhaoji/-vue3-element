@@ -1,3 +1,7 @@
+/**
+ * 代码生成器
+ * @author 耿朝继
+ */
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
@@ -196,8 +200,8 @@ function parseModel(model, name) {
                     options: options,
                     methodType: method,
                     httpMethod: httpMethod,
-                    upperSnakeCaseName: toUpperSnakeCaseName(method + '_' + model.name),
-                    camelCaseName: toCamelCase(method + '_' + model.name),
+                    upperSnakeCaseName: toUpperSnakeCaseName(method + '_' + (model.name ?? '')),
+                    camelCaseName: toCamelCase(method + '_' + (model.name ?? '')),
                     title: model.title,
                 });
             });
@@ -217,7 +221,8 @@ function writeApi(json, info) {
             if (item.prefix) {
                 configKeys.push(item.prefix);
             }
-            let url = item.path + item.suffix;
+            // 是否已经写了后缀
+            let url = `/${item.path.split('/').at(-1)}` == item.suffix ? item.path : item.path + item.suffix;
             let keys = [];
             pathToRegexp(url, keys);
 
@@ -225,7 +230,7 @@ function writeApi(json, info) {
             if (!items.some((n) => n.URL === item.upperSnakeCaseName)) {
                 items.push({
                     URL: item.upperSnakeCaseName,
-                    url: item.path + item.suffix,
+                    url,
                     prefix: item.prefix,
                     params: keys.map((n) => n.name),
                     camelCaseName: item.camelCaseName,
@@ -270,15 +275,15 @@ function writeIconData() {
     });
 
     // element-ui icon
-    const elIconCssFile = config.elIconCssFile || '../node_modules/element-ui/packages/theme-chalk/lib/icon.css';
-    content = fs.readFileSync(path.join(__dirname, elIconCssFile), { encoding: 'utf-8' });
-    regex = /.el-icon-[\w-_]+:/g;
-    matches = content.match(regex);
-    const elItems = matches.map(function (item) {
-        return item.replace('.el-', 'el-').replace(':', '');
-    });
-
-    const fileContent = iconsRender({ data: stringify([...items, ...elItems]) });
+    // const elIconCssFile = config.elIconCssFile || '../node_modules/element-ui/packages/theme-chalk/lib/icon.css';
+    // content = fs.readFileSync(path.join(__dirname, elIconCssFile), { encoding: 'utf-8' });
+    // regex = /.el-icon-[\w-_]+:/g;
+    // matches = content.match(regex);
+    // const elItems = matches.map(function (item) {
+    //     return item.replace('.el-', 'el-').replace(':', '');
+    // });
+    // const fileContent = iconsRender({ data: stringify([...items, ...elItems]) });
+    const fileContent = iconsRender({ data: stringify([...items]) });
     try {
         fs.unlinkSync(path.join(__dirname, config.outIconFile));
         fs.writeFileSync(path.join(__dirname, config.outIconFile), beautifyJs(fileContent), {

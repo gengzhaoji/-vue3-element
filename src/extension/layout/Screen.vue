@@ -1,29 +1,19 @@
 <template>
     <el-tooltip class="item" effect="dark" :content="isFullscreen ? '退出全屏' : '全屏'">
-        <i class="sfont el-icon-full-screen" @click="toggle" />
+        <el-icon @click="toggle">
+            <full-screen />
+        </el-icon>
     </el-tooltip>
 </template>
 
-<script>
-import { defineComponent } from 'vue';
+<script setup name="screen">
 import { useFullscreen } from '@vueuse/core';
-
-export default defineComponent({
-    name: 'screen',
-    setup() {
-        const { isFullscreen, toggle } = useFullscreen();
-        return {
-            isFullscreen,
-            toggle,
-        };
-    },
-});
+const { isFullscreen, toggle } = useFullscreen();
 </script>
 
 <style lang="scss" scoped>
-i {
+.el-icon {
     cursor: pointer;
-    font-size: 18px;
     &:focus {
         outline: none;
     }

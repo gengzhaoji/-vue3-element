@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="default">
+<html lang="en" class="light" id="menu">
     <head>
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -7,10 +7,8 @@
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="white" />
         <link rel="icon" href="/favicon.ico" />
-        <!-- <script src="/config.js"></script> -->
-        <%- injectAMapScript %>
-        <title><%- title %></title>
-
+        <%- injectConfigScript %>
+        <title><%- TITLE %></title>
         <style type="text/css">
             html,
             body {
@@ -24,9 +22,8 @@
                 -moz-osx-font-smoothing: grayscale;
                 -webkit-font-smoothing: antialiased;
                 text-rendering: optimizeLegibility;
-                font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
-                background: #fff;
-                color: #303133;
+                font-family: var(--el-font-family);
+                color: var(--el-text-color-primary);
                 min-width: 1024px;
             }
 

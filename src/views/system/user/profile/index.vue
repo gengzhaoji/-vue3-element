@@ -64,40 +64,23 @@
     </div>
 </template>
 
-<script>
+<script setup name="profile">
 import { infoUserProfile } from '@/api/public';
-import { defineComponent } from 'vue';
 import resetPwd from './resetPwd.vue';
 import userAvatar from './userAvatar.vue';
 import userInfo from './userInfo.vue';
-export default defineComponent({
-    name: 'Profile',
-    components: {
-        userAvatar,
-        userInfo,
-        resetPwd,
-    },
-    data() {
-        return {
-            user: {},
-            roleGroup: {},
-            postGroup: {},
-            activeTab: 'userinfo',
-        };
-    },
-    created() {
-        this.getUser();
-    },
-    methods: {
-        getUser() {
-            infoUserProfile().then((response) => {
-                this.user = response.data.user;
-                this.roleGroup = response.data.roles.join('');
-                this.postGroup = response.data.posts.join('');
-            });
-        },
-    },
-});
+let user = $ref({}),
+    roleGroup = $ref({}),
+    postGroup = $ref({}),
+    activeTab = $ref('userinfo');
+getUser();
+function getUser() {
+    infoUserProfile().then((response) => {
+        user = response.data.user;
+        roleGroup = response.data.roles.join('');
+        postGroup = response.data.posts.join('');
+    });
+}
 </script>
 
 <style lang="scss" scoped>
@@ -111,11 +94,5 @@ export default defineComponent({
     margin-bottom: -1px;
     padding: 11px 0px;
     font-size: 13px;
-}
-:deep() {
-    .el-card__header {
-        background-color: var(--system-menu-background);
-        color: var(--system-menu-text-color);
-    }
 }
 </style>

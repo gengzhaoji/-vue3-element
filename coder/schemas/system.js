@@ -4,103 +4,56 @@ module.exports = {
         {
             title: '菜单管理',
             name: 'menu',
+            methods: ['add', 'edit', 'remove', 'list', 'info'],
             path: '/system/menu',
         },
         {
             title: '用户管理',
             name: 'user',
+            methods: ['add', 'edit', 'remove', 'page', 'info', 'export'],
             path: '/system/user',
-        },
-        {
-            title: '用户管理导出',
-            name: 'user',
-            methods: 'export',
-            path: '/system/user/export',
-            options: {
-                responseType: 'blob',
-            },
         },
         {
             title: '部门管理',
             name: 'dept',
+            methods: ['add', 'edit', 'remove', 'page', 'info'],
             path: '/system/dept',
         },
         {
             title: '操作日志',
             name: 'operlog',
-            methods: ['page', 'remove'],
+            methods: ['page', 'remove', 'export'],
             path: '/system/operlog',
-        },
-        {
-            title: '操作日志导出',
-            name: 'operlog',
-            methods: 'export',
-            path: '/system/operlog/export',
-            options: {
-                responseType: 'blob',
-            },
         },
         {
             title: '登录日志',
             name: 'logininfor',
-            methods: ['page', 'remove'],
+            methods: ['page', 'remove', 'export'],
             path: '/system/logininfor',
         },
         {
-            title: '登录日志导出',
-            name: 'logininfor',
-            methods: 'export',
-            path: '/system/logininfor/export',
-            options: {
-                responseType: 'blob',
-            },
-        },
-        {
             title: '字典管理',
             name: 'typedict',
+            methods: ['add', 'edit', 'remove', 'page', 'info', 'export'],
             path: '/system/dict/type',
         },
         {
-            title: '字典管理导出',
-            name: 'typedict',
-            methods: 'export',
-            path: '/system/dict/type/export',
-            options: {
-                responseType: 'blob',
-            },
-        },
-        {
-            title: '字典管理',
+            title: '字典管理-详情',
             name: 'datadict',
+            methods: ['add', 'edit', 'remove', 'page'],
             path: '/system/dict/data',
         },
         {
             title: '角色管理',
             name: 'role',
+            methods: ['add', 'edit', 'remove', 'page', 'info', 'export'],
             path: '/system/role',
-        },
-        {
-            title: '角色管理导出',
-            name: 'role',
-            methods: 'export',
-            path: '/system/role/export',
-            options: {
-                responseType: 'blob',
-            },
         },
         {
             title: '岗位管理',
             name: 'post',
+            methods: ['add', 'edit', 'remove', 'page', 'info', 'export'],
             path: '/system/post',
-        },
-        {
-            title: '岗位管理导出',
-            name: 'post',
-            methods: 'export',
-            path: '/system/post/export',
-            options: {
-                responseType: 'blob',
-            },
         },
         {
             title: '配置管理',
@@ -112,33 +65,6 @@ module.exports = {
             name: 'config',
             methods: 'useData',
             path: '/system/config/use/data',
-        },
-        {
-            title: '消息-更新已读',
-            name: 'readed',
-            methods: 'update',
-            path: '/message/info/updateReaded',
-        },
-        {
-            title: '消息-删除',
-            name: 'message',
-            methods: 'remove',
-            path: '/message/info',
-            options: {
-                method: 'delete',
-            },
-        },
-        {
-            title: '消息-未读',
-            name: 'count',
-            methods: 'unRead',
-            path: '/message/info/unReadCount',
-        },
-        {
-            title: '消息-分页',
-            name: 'message',
-            methods: 'page',
-            path: '/message/info',
         },
     ],
 };

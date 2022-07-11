@@ -71,3 +71,16 @@ export function floatDiv(a, b) {
     } catch (g) {}
     return (c = Number(a.toString().replace('.', ''))), (d = Number(b.toString().replace('.', ''))), floatMul(c / d, Math.pow(10, f - e));
 }
+
+/**
+ * 保留有效数字并且4舍5入
+ * @param {*} v 表示要转换的值 表示要保留的位数
+ * @param {*} e 表示要保留的位数
+ * @returns
+ */
+export function round(v, e) {
+    var t = 1;
+    for (; e > 0; t *= 10, e--);
+    for (; e < 0; t /= 10, e++);
+    return Math.round(v * t) / t;
+}

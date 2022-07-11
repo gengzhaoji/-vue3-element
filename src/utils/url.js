@@ -9,23 +9,28 @@ import { pathToRegexp } from 'path-to-regexp';
 const hostRegex = /^(http|https):\/\/[\w.:]*\//;
 
 /**
+ * 是否为外链地址
+ * @param {string} path
+ * @returns {Boolean}
+ */
+export function isExternal(path) {
+    return /^(https?:|mailto:|tel:)/.test(path);
+}
+
+/**
  * 参数字符串转换成对象形式，如：a=1&b=2 转换成 {a:1, b:2}
  * @param {String} str 需要转换的字符串
  * @param {String} [sep=&] 连接符，可选，默认 &
  * @param {String} [eq==] 键值间隔符，可选，默认 =
  * @returns {Object}
  */
-export function parse(str, sep, eq) {
+export function parse(str, sep = '&', eq = '=') {
     let obj = {};
     str = (str || location.search).replace(/^[^]*\?/, '');
-    sep = sep || '&';
-    eq = eq || '=';
     let arr,
         reg = new RegExp('(?:^|\\' + sep + ')([^\\' + eq + '\\' + sep + ']+)(?:\\' + eq + '([^\\' + sep + ']*))?', 'g');
     while ((arr = reg.exec(str)) !== null) {
-        if (arr[1] !== str) {
-            obj[decodeURIComponent(arr[1])] = decodeURIComponent(arr[2] || '');
-        }
+        if (arr[1] !== str) obj[decodeURIComponent(arr[1])] = decodeURIComponent(arr[2] || '');
     }
     return obj;
 }

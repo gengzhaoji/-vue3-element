@@ -1,5 +1,5 @@
 {
-    "workbench.editor.enablePreview": false, //打开文件不覆盖
+    //"workbench.editor.enablePreview": false, //打开文件不覆盖
     "search.followSymlinks": false, //关闭rg.exe进程
     "editor.minimap.enabled": false, //打开自动保存
     "editor.lineNumbers": "on", //开启行数提示
@@ -34,7 +34,8 @@
     "files.associations": {
         "*.cjson": "jsonc",
         "*.wxss": "css",
-        "*.wxs": "javascript"
+        "*.wxs": "javascript",
+        "*.svg": "html"
     },
     "emmet.includeLanguages": {
         "wxml": "html"

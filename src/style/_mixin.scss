@@ -83,3 +83,24 @@
     /* W3C */
     background-image: linear-gradient(to right, $from, $to);
 }
+
+/* Scrollbar
+ -------------------------- */
+@mixin scroll-bar($width: 8px, $color: rgba(0, 0, 0, 0.3)) {
+    ::-webkit-scrollbar {
+        width: $width;
+
+        &:horizontal {
+            height: $width;
+        }
+
+        &-thumb {
+            border-radius: calc($width/2);
+            background-color: $color;
+        }
+
+        &-track {
+            background-color: transparent;
+        }
+    }
+}

@@ -80,15 +80,6 @@ module.exports = {
             },
         },
         {
-            title: '批量文件数据上传转换PDF',
-            name: 'uploadToPdf',
-            methods: 'rdfileBatch',
-            path: '/rdfile/data/batch/uploadToPdf',
-            options: {
-                method: 'post',
-            },
-        },
-        {
             title: '文件数据修改名称',
             name: 'rename',
             methods: 'rdfile',
@@ -108,6 +99,12 @@ module.exports = {
             name: 'dicts',
             methods: 'get',
             path: '/system/dict/data/use/list/:dictType',
+        },
+        {
+            title: '多个字典key查询多个字典数据',
+            name: 'dictTypes',
+            methods: 'get',
+            path: '/system/dict/data/use/types',
         },
         {
             title: '用户信息',
@@ -177,7 +174,7 @@ module.exports = {
         },
         {
             title: '根据部门id查询人员列表',
-            name: 'workerList',
+            name: 'List',
             methods: 'worker',
             path: '/system/worker/workerList',
         },

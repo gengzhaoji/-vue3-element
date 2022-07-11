@@ -1,0 +1,75 @@
+{
+  "name": "Flowable",
+  "uri": "http://www.xarundao.com/bpmn",
+  "prefix": "rundow",
+  "xml": {
+    "tagAlias": "lowerCase"
+  },
+  "associations": [],
+  "types": [
+    {
+      "name": "Process",
+      "extends": ["bpmn:Process"],
+      "isAbstract": true,
+      "properties": [
+        {
+          "name": "group",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "ServiceTask",
+      "extends": ["bpmn:ServiceTask"],
+      "isAbstract": true,
+      "properties": [
+        {
+          "name": "class",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "fields",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "UserTask",
+      "extends": ["bpmn:UserTask"],
+      "isAbstract": true,
+      "properties": [
+        {
+          "name": "approveType",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "userType",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "keys",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "SequenceFlow",
+      "extends": ["bpmn:SequenceFlow"],
+      "isAbstract": true,
+      "properties": [
+        {
+          "name": "expressions",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    }
+  ],
+  "emumerations": []
+}

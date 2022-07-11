@@ -1,14 +1,10 @@
 <template>
-    <div style="position: absolute;width: 100%;height: 20px;overflow: hidden;">
-        <svg style="width: 100%;height: 100%;">
+    <div style="position: absolute; width: 100%; height: 20px; overflow: hidden">
+        <svg style="width: 100%; height: 100%">
             <g>
                 <g>
                     <polyline stroke="#1de2ff" points="525.2,16.8 532.5,9.3 804.7,9.3" class="st5" />
-                    <polyline
-                        stroke="#1de2ff"
-                        points="1394.6,16.6 1389.3,11.3 1117.1,11.3"
-                        class="st5"
-                    />
+                    <polyline stroke="#1de2ff" points="1394.6,16.6 1389.3,11.3 1117.1,11.3" class="st5" />
                     <animate
                         accumulate="none"
                         additive="replace"
@@ -149,7 +145,3 @@
     stroke-miterlimit: 10;
 }
 </style>
-
-
-
-

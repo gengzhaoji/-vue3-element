@@ -123,17 +123,6 @@ export const rdfileBatchUpload = (data) => axios({
 })
 
 /**
- * 批量文件数据上传转换PDF
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const rdfileBatchUploadToPdf = (data) => axios({
-	method: 'post',
-	data: data,
-	url: API_HOST + '/rdfile/data/batch/uploadToPdf'
-})
-
-/**
  * 文件数据修改名称
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
@@ -168,6 +157,17 @@ export const getDicts = (dictType, data) => axios({
 	},
 	data: data,
 	url: API_HOST + '/system/dict/data/use/list/:dictType'
+})
+
+/**
+ * 多个字典key查询多个字典数据
+ * @param {object} [data] 发送键值对数据
+ * @returns {promise}
+ */
+export const getDictTypes = (data) => axios({
+	method: 'get',
+	data: data,
+	url: API_HOST + '/system/dict/data/use/types'
 })
 
 /**
@@ -285,7 +285,7 @@ export const uploadAvatar = (data) => axios({
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
-export const workerWorkerList = (data) => axios({
+export const workerList = (data) => axios({
 	method: 'get',
 	data: data,
 	url: API_HOST + '/system/worker/workerList'

@@ -1,16 +1,17 @@
 import { ElMessageBox } from 'element-plus';
-import store from '@/store';
+import user from '@/store/user';
 const statiConfig = window.__config__ || {};
 
-const isNewVersion = () => {
+export default () => {
     const version = statiConfig.VERSION;
-    const token = store.state.user.token;
+    const store = user();
+    const token = store.token;
     let localVersion = localStorage.getItem('version');
     // 存在版本
     if (version) {
         if (!localVersion) {
             localStorage.clear();
-            store.commit('SET_TOKEN', token);
+            store.token = token;
             localStorage.setItem('version', version);
             window.location.reload();
         } else {
@@ -19,7 +20,7 @@ const isNewVersion = () => {
                     confirmButtonText: '确定',
                     callback: () => {
                         localStorage.clear();
-                        store.commit('SET_TOKEN', token);
+                        store.token = token;
                         localStorage.setItem('version', version);
                         window.location.reload();
                     },
@@ -27,8 +28,4 @@ const isNewVersion = () => {
             }
         }
     }
-};
-
-export default {
-    isNewVersion,
 };

@@ -1,8 +1,7 @@
 <template>
     <div class="page">
-        <div class="top-title">岗位管理</div>
         <div class="p-10 system-page-background b-r-4">
-            <com-form
+            <my-form
                 inline
                 query
                 label-width="70px"
@@ -14,233 +13,221 @@
                         itemType: 'select',
                         prop: 'status',
                         label: '状态',
-                        list: $store.state.dict.sysNormalDisable,
+                        list: $store.dict.sysNormalDisable,
                     },
                 ]"
-                @searchFn="$refs.table.reload()"
-                @resetFn="$refs.table.reload()"
+                @searchFn="table.reload()"
+                @resetFn="table.reload()"
             />
         </div>
         <div class="f1 h0 flex-col system-page-background m-t-10 b-r-4">
             <div class="p-10" v-hasPermi="['system:post:add', 'system:post:remove', 'system:post:export']">
-                <com-button class="el-button--secret" plain icon="el-icon-plus" @click.prevent="Add" v-hasPermi="['system:post:add']"> 新 增 </com-button>
-                <com-button plain class="el-button--secret" :disabled="!tableSelection.length" @click.prevent="Delete" icon="el-icon-delete" v-hasPermi="['system:post:remove']">
-                    删 除
-                </com-button>
-                <com-button-export plain class="el-button--secret" :load="Export" v-hasPermi="['system:post:export']" />
+                <my-button type="primary" icon="Plus" @click.prevent="Add" v-hasPermi="['system:post:add']"> 新 增 </my-button>
+                <el-button-group> <my-button-export :load="Export" v-hasPermi="['system:post:export']" /> </el-button-group>
+                <my-button type="danger" v-show="tableSelection.length" @click.prevent="Delete" icon="Delete" v-hasPermi="['system:post:remove']"> 删 除 </my-button>
             </div>
-            <xdh-list-panel ref="table" :loadFn="loadData" :total="state.total">
-                <xdh-table :data="state.list" :columns="state.columns" @selection-change="(val) => (tableSelection = val)">
-                    <template #index="{ $index }">
-                        {{ $index + 1 + ($refs.table.currentPage - 1) * $refs.table.pageSize }}
-                    </template>
+            <my-list-panel ref="table" :loadFn="loadData" :total="state.total">
+                <my-table :data="state.list" :columns="state.columns" @selection-change="(val) => (tableSelection = val)">
                     <template #status="{ row }">
-                        {{ selectDictLabel($store.state.dict.sysNormalDisable, row.status) }}
+                        <el-switch v-model="row.status" inline-prompt :active-value="0" :inactive-value="1" active-text="启" inactive-text="停" @change="statusFn(row)" />
                     </template>
                     <template #default="{ row }">
-                        <com-button type="text" class="caozuo" @click.prevent="Update(row)" v-hasPermi="['system:post:edit']"> 修改 </com-button>
+                        <my-button-text @click.prevent="Update(clone(row))" v-hasPermi="['system:post:edit']"> 修改 </my-button-text>
                     </template>
-                </xdh-table>
-            </xdh-list-panel>
+                </my-table>
+            </my-list-panel>
         </div>
 
         <!-- 添加或修改岗位对话框 -->
-        <el-dialog :title="dialog.title" v-model="dialog.open" width="500px" append-to-body @closed="resetForm('dialogForm')">
+        <el-dialog :title="dialog.title" v-model="dialog.open" width="500px" append-to-body @close="resetForm(dialogForm)">
             <el-form ref="dialogForm" :model="dialog.form" :rules="rules" label-width="100px" class="validate--bottom">
                 <el-form-item label="岗位名称" prop="postName">
-                    <com-input v-model="dialog.form.postName" placeholder="请输入岗位名称" />
+                    <my-input v-model="dialog.form.postName" placeholder="请输入岗位名称" />
                 </el-form-item>
                 <el-form-item label="岗位编码" prop="postCode">
-                    <com-input v-model="dialog.form.postCode" placeholder="请输入编码名称" />
+                    <my-input v-model="dialog.form.postCode" placeholder="请输入编码名称" />
                 </el-form-item>
                 <el-form-item label="岗位顺序" prop="postSort">
-                    <com-input-number v-model="dialog.form.postSort" :min="0" />
+                    <my-input-number v-model="dialog.form.postSort" :min="0" />
                 </el-form-item>
                 <el-form-item label="岗位状态" prop="status">
                     <el-radio-group v-model="dialog.form.status">
-                        <el-radio v-for="dict in $store.state.dict.sysNormalDisable" :key="dict.dictValue" :label="dict.dictValue">
+                        <el-radio v-for="dict in $store.dict.sysNormalDisable" :key="dict.dictValue" :label="dict.dictValue * 1">
                             {{ dict.dictLabel }}
                         </el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="备注" prop="remark">
-                    <com-input v-model="dialog.form.remark" type="textarea" placeholder="请输入内容" />
+                    <my-input v-model="dialog.form.remark" type="textarea" placeholder="请输入内容" />
                 </el-form-item>
             </el-form>
             <template #footer>
                 <div class="dialog-footer">
-                    <com-button type="primary" @click.prevent="submitForm()"> 确 定 </com-button>
-                    <com-button @click.prevent="cancel()">取 消</com-button>
+                    <my-button type="primary" @click.prevent="submitForm()"> 确 定 </my-button>
+                    <my-button @click.prevent="dialog.open = false">取 消</my-button>
                 </div>
             </template>
         </el-dialog>
     </div>
 </template>
 
-<script>
+<script setup name="Post">
 import { pagePost, removePost, addPost, editPost, infoPost, exportPost } from '@/api/system';
 import { downloadBlob } from '@u/download';
 
-export default {
-    name: 'Post',
-    data() {
-        return {
-            // 查询参数
-            queryParams: {
-                needCount: 1,
-                likePostCode: '',
-                likePostName: '',
-                status: '',
-                orderByColumn: 'postSort',
-                isAsc: '',
+// 查询参数
+let queryParams = $ref({
+        likePostCode: '',
+        likePostName: '',
+        status: '',
+        orderByColumn: 'postSort',
+        isAsc: '',
+    }),
+    state = $ref({
+        total: 0,
+        list: [],
+        columns: [
+            {
+                type: 'selection',
             },
-            state: {
-                total: 0,
-                list: [],
-                columns: [
-                    {
-                        type: 'selection',
-                    },
-                    {
-                        label: '岗位编号',
-                        width: '100',
-                        prop: 'id',
-                    },
-                    {
-                        label: '岗位编码',
-                        prop: 'postCode',
-                    },
-                    {
-                        label: '岗位名称',
-                        prop: 'postName',
-                    },
-                    {
-                        label: '岗位排序',
-                        prop: 'postSort',
-                    },
-                    {
-                        label: '状态',
-                        prop: 'status',
-                    },
-                    {
-                        label: '创建时间',
-                        prop: 'createTime',
-                    },
-                    {
-                        label: '备注',
-                        prop: 'remark',
-                    },
-                    {
-                        label: '操作',
-                        width: '100',
-                    },
-                ],
+            {
+                label: '岗位编号',
+                width: '100',
+                prop: 'id',
             },
-            tableSelection: [],
-            // 弹出层
-            dialog: {
-                title: '',
-                open: false,
-                form: {
-                    postId: undefined,
-                    postName: '',
-                    postCode: '',
-                    postSort: 0,
-                    status: '',
-                    remark: '',
-                },
+            {
+                label: '岗位编码',
+                prop: 'postCode',
             },
-            // 表单校验
-            rules: {
-                postName: [{ required: true, message: '岗位名称不能为空', trigger: 'change' }],
-                postCode: [{ required: true, message: '岗位编码不能为空', trigger: 'change' }],
-                postSort: [{ required: true, message: '岗位顺序不能为空', trigger: 'change' }],
-                status: [{ required: true, message: '岗位状态不能为空', trigger: 'change' }],
+            {
+                label: '岗位名称',
+                prop: 'postName',
             },
-        };
+            {
+                label: '岗位排序',
+                prop: 'postSort',
+            },
+            {
+                label: '状态',
+                prop: 'status',
+            },
+            {
+                label: '创建时间',
+                prop: 'createTime',
+            },
+            {
+                label: '备注',
+                prop: 'remark',
+            },
+            {
+                label: '操作',
+                width: '100',
+            },
+        ],
+    }),
+    tableSelection = $ref([]),
+    // 弹出层
+    dialog = $ref({
+        title: '',
+        open: false,
+        form: {
+            postId: undefined,
+            postName: '',
+            postCode: '',
+            postSort: 0,
+            status: '',
+            remark: '',
+        },
+    });
+
+const $vm = inject('$vm'),
+    // 表单校验
+    rules = {
+        postName: [{ required: true, message: '岗位名称不能为空', trigger: 'change' }],
+        postCode: [{ required: true, message: '岗位编码不能为空', trigger: 'change' }],
+        postSort: [{ required: true, message: '岗位顺序不能为空', trigger: 'change' }],
+        status: [{ required: true, message: '岗位状态不能为空', trigger: 'change' }],
     },
-    created() {
-        this.$store.dispatch('GETsysNormalDisable');
-    },
-    methods: {
-        // 本页面的查询函数
-        getList() {
-            this.$refs.table.loadData();
-        },
-        // 初始化表格查询逻辑
-        loadData(pageNum, pageSize) {
-            return pagePost(Object.assign({ pageNum, pageSize }, this.queryParams)).then((res) => {
-                this.state.total = res.data.total;
-                this.state.list = res.data.rows;
+    table = $ref(null),
+    dialogForm = $ref(null);
+// 初始化表格查询逻辑
+function loadData(pageNum, pageSize) {
+    return pagePost(Object.assign({ pageNum, pageSize }, queryParams)).then((res) => {
+        state.total = res.data.total;
+        state.list = res.data.rows;
+    });
+}
+/**
+ * 启用、停用
+ */
+function statusFn(row) {
+    if (row.id) {
+        const text = row.status === 0 ? '启用' : '停用';
+        $vm.$$confirm(`确认要—${text}（${row.postName}）岗位吗?`)
+            .then(() => editPost(row))
+            .then(() => {
+                $vm.msgSuccess(text + '成功');
+            })
+            .catch(() => {
+                row.status = row.status === 0 ? 1 : 0;
+                $vm.msgInfo('已取消！');
             });
-        },
-        // 取消按钮
-        cancel() {
-            this.dialog.open = false;
-            this.dialog.form.id = undefined;
-        },
-        /** 新增按钮操作 */
-        Add() {
-            this.dialog.open = true;
-            this.dialog.title = '添加岗位';
-        },
-        /** 修改按钮操作 */
-        Update(row) {
-            infoPost({ id: row.id }).then((response) => {
-                this.dialog.form = response.data;
-                this.dialog.open = true;
-                this.dialog.title = '修改岗位';
+    }
+}
+/** 新增按钮操作 */
+function Add() {
+    dialog.open = true;
+    dialog.title = '添加岗位';
+    dialog.form.id = undefined;
+}
+/** 修改按钮操作 */
+function Update(row) {
+    infoPost({ id: row.id }).then((res) => {
+        dialog.open = true;
+        dialog.title = '修改岗位';
+        nextTick(() => {
+            dialog.form = res.data;
+        });
+    });
+}
+/** 提交按钮 */
+function submitForm() {
+    dialogForm.validate((valid) => {
+        if (valid) {
+            (dialog.form.id !== undefined ? editPost : addPost)(dialog.form).then(() => {
+                $vm.msgSuccess(dialog.form.id !== undefined ? '修改成功' : '新增成功');
+                dialog.open = false;
+                table.loadData();
             });
-        },
-        /** 提交按钮 */
-        submitForm: function () {
-            this.$refs['dialogForm'].validate((valid) => {
-                if (valid) {
-                    if (this.dialog.form.id !== undefined) {
-                        editPost(this.dialog.form).then(() => {
-                            this.msgSuccess('修改成功');
-                            this.cancel();
-                            this.getList();
-                        });
+        }
+    });
+}
+/** 删除按钮操作 */
+function Delete() {
+    $vm.$$confirm('此操作将永久删除选中数据, 是否继续?')
+        .then(() => {
+            removePost({ ids: tableSelection.map((item) => item.id).join() }).then(() => {
+                if (tableSelection.length === state.list.length) {
+                    if (table.lastcurrentPage) {
+                        table.reload();
                     } else {
-                        addPost(this.dialog.form).then(() => {
-                            this.msgSuccess('新增成功');
-                            this.cancel();
-                            this.getList();
-                        });
+                        table.loadData();
                     }
+                } else {
+                    table.loadData();
                 }
+                $vm.msgSuccess('删除成功');
             });
-        },
-        /** 删除按钮操作 */
-        Delete() {
-            this.$$confirm('此操作将永久删除选中数据, 是否继续?')
-                .then(() => {
-                    removePost({
-                        ids: this.tableSelection.map((item) => item.id).join(),
-                    }).then(() => {
-                        if (this.tableSelection.length === this.state.list.length) {
-                            if (this.$refs.table.lastcurrentPage) {
-                                this.$refs.table.reload();
-                            } else {
-                                this.getList();
-                            }
-                        } else {
-                            this.getList();
-                        }
-                        this.msgSuccess('删除成功');
-                    });
-                })
-                .catch(() => {
-                    this.msgInfo('已取消删除！');
-                });
-        },
-        /** 导出按钮操作 */
-        Export() {
-            return exportPost(this.queryParams).then((data) => {
-                downloadBlob(data, '岗位管理.xlsx');
-            });
-        },
-    },
-};
+        })
+        .catch(() => {
+            $vm.msgInfo('已取消删除！');
+        });
+}
+/** 导出按钮操作 */
+function Export() {
+    return exportPost(queryParams).then((data) => {
+        downloadBlob(data, '岗位管理.xlsx');
+    });
+}
+$vm.$store.dict.GETsysNormalDisable();
 </script>

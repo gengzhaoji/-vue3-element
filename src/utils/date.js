@@ -49,39 +49,3 @@ export default function date(dateStr = new Date(), format = 'YYYY-MM-DD hh:mm:ss
         return obj;
     }
 }
-
-/**
- * 判断当前时间为、早班、中班、晚班
- * @returns
- */
-export function compareTime() {
-    const day = date(new Date(), 'yyyy/MM/dd');
-    const nowTime = new Date().getTime();
-    // 早班时间为
-    if (nowTime < new Date(`${day} 07:59:59`).getTime() && nowTime > new Date(`${day} 00:00:00`).getTime()) {
-        return {
-            Time: 'nightPatrolTime',
-            Condition: 'nightPatrolCondition',
-            prop: 'nightPatrolStatus',
-            label: '夜班',
-        };
-    }
-    // 中班时间
-    if (nowTime < new Date(`${day} 15:59:59`).getTime() && nowTime > new Date(`${day} 08:00:00`).getTime()) {
-        return {
-            Time: 'dayPatrolTime',
-            Condition: 'dayPatrolCondition',
-            prop: 'dayPatrolStatus',
-            label: '白班',
-        };
-    }
-    // 晚班时间
-    if (nowTime < new Date(`${day} 23:59:59`).getTime() && nowTime > new Date(`${day} 16:00:00`).getTime()) {
-        return {
-            Time: 'middlePatrolTime',
-            Condition: 'middlePatrolCondition',
-            prop: 'middlePatrolStatus',
-            label: '中班',
-        };
-    }
-}

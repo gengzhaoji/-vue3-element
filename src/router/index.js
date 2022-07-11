@@ -1,25 +1,24 @@
-import { createWebHashHistory, createRouter } from 'vue-router';
+import { createWebHistory, createRouter } from 'vue-router';
+import Layout from '@/extension/layout/index.vue';
+import ParentView from '@/extension/ParentView/index.vue';
+
 // 路由守卫
 import guarder from '@/helper/guarder.js';
-// 页面布局
-import Layout from '@/extension/layout/index.vue';
-
-// 路由懒加载
-export const loadView = (path) => () => import(`../views/${path}.vue`);
 
 // 公共路由
 export const constantRoutes = [
     {
-        path: '/',
-        redirect: '/index',
+        path: '/profile',
+        name: '/profile',
         component: Layout,
         children: [
             {
-                path: 'index',
-                name: 'index',
-                component: () => import('../views/homepage/index.vue'),
+                path: '',
+                name: '',
+                component: () => import('../views/system/user/profile/index.vue'),
                 meta: {
-                    title: '首页',
+                    title: '个人信息',
+                    hideTabs: true,
                 },
             },
         ],
@@ -36,7 +35,7 @@ export const constantRoutes = [
     {
         path: '/403',
         name: '/403',
-        component: () => import('../extension/exception/xdh-403.vue'),
+        component: () => import('../extension/exception/my-403.vue'),
         meta: {
             title: '403页面',
             hideTabs: true,
@@ -45,7 +44,7 @@ export const constantRoutes = [
     {
         path: '/500',
         name: '/500',
-        component: () => import('../extension/exception/xdh-500.vue'),
+        component: () => import('../extension/exception/my-500.vue'),
         meta: {
             title: '500页面',
             hideTabs: true,
@@ -54,7 +53,7 @@ export const constantRoutes = [
     {
         path: '/404',
         name: '/404',
-        component: () => import('../extension/exception/xdh-404.vue'),
+        component: () => import('../extension/exception/my-404.vue'),
         meta: {
             title: '404页面',
             hideTabs: true,
@@ -62,10 +61,7 @@ export const constantRoutes = [
     },
 ];
 
-const router = createRouter({
-    history: createWebHashHistory(),
-    routes: constantRoutes,
-});
+const router = createRouter({ history: createWebHistory(), routes: constantRoutes });
 
 guarder(router);
 

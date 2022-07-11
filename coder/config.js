@@ -14,6 +14,8 @@ module.exports = {
         'edit', // 更新数据
         'remove', // 删除数据
         'page', // 列表数据，响应数据含有分页信息，如：总数、当前页码、页大小
+        'list', // 不分页列表数据
+        'export', // 根据条件导出
         'info', // 详情查询
         'unique', // 唯一校验
     ],
@@ -24,6 +26,8 @@ module.exports = {
         edit: 'put',
         remove: 'delete',
         page: 'get',
+        list: 'get',
+        export: 'get',
         info: 'get',
         unique: 'get',
     },
@@ -34,6 +38,8 @@ module.exports = {
         edit: '/edit',
         remove: '/remove',
         page: '/page',
+        list: '/list',
+        export: '/export',
         info: '/info',
         unique: '/unique',
     },
@@ -44,6 +50,8 @@ module.exports = {
         edit: '更新<%=cname%>',
         remove: '删除<%=cname%>',
         page: '获取<%=cname%>分页列表',
+        list: '获取<%=cname%>不分页列表',
+        export: '根据条件导出<%=cname%>',
         info: '获取<%=cname%>单条信息详情',
         unique: '<%=cname%>字段去重校验',
     },

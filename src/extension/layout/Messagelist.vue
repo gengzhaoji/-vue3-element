@@ -27,53 +27,37 @@
         </template>
         <el-empty v-else :image-size="160" description="暂无数据"></el-empty>
         <div class="footer flex-center" v-if="data.length > 0">
-            <div class="flex-center" @click="$router.push('/system/message')">
-                <span>{{ this.arrow }}</span> <i class="icon-jump"></i>
-            </div>
+            <div class="flex-center" @click="$router.push('/system/message')"><span>查看全部</span> <i class="icon-jump"></i></div>
         </div>
     </div>
 </template>
-<script>
-import { unReadCount, updateReaded } from '@/api/system';
 
-export default {
-    name: 'Messagelist',
-    data() {
-        return {
-            isDisabled: true,
-            arrow: '查看全部',
-        };
+<script setup name="Messagelist">
+import { updateReaded } from '@/api/system';
+const $vm = inject('$vm');
+// 路由跳转
+const props = defineProps({
+    data: {
+        type: Array,
     },
-    props: {
-        data: {
-            type: Array,
-        },
-        loadFn: {
-            type: Function,
-        },
+    loadFn: {
+        type: Function,
     },
-    methods: {
-        // 未读消息数量
-        unReadCount() {
-            unReadCount().then((res) => {
-                this.messageNum = res.data;
-            });
-        },
-        routerFn(item) {
-            this.$router.push(item.path);
-            // 增加延时防止路由跳转时接口请求失败
-            setTimeout(() => {
-                updateReaded({ ids: item.id }).then(() => {
-                    this.loadFn();
-                });
-            });
-        },
-        // 文本超出出tip e.target.clientWidth; 文本可视宽度 e.target.scrollWidth; 文本实际宽度
-        isShowTootip(e) {
-            this.isDisabled = e.target.scrollWidth <= e.target.clientWidth;
-        },
-    },
-};
+});
+function routerFn(item) {
+    $vm.$router.push(item.path);
+    // 增加延时防止路由跳转时接口请求失败
+    setTimeout(() => {
+        updateReaded({ ids: item.id }).then(() => {
+            props.loadFn();
+        });
+    });
+}
+// 文本超出出tip e.target.clientWidth; 文本可视宽度 e.target.scrollWidth; 文本实际宽度
+let isDisabled = $ref(true);
+function isShowTootip(e) {
+    isDisabled = e.target.scrollWidth <= e.target.clientWidth;
+}
 </script>
 
 <style lang="scss" scoped>

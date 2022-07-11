@@ -132,3 +132,60 @@ export function isHidden(el) {
     const style = window.getComputedStyle(el);
     return style.display === 'none' || style.visibility === 'hidden';
 }
+
+/**
+ * dom添加监听事件
+ * @param {*} element
+ * @param {*} event
+ * @param {*} handler
+ * @param {*} useCapture
+ */
+export function on(element, event, handler, useCapture = false) {
+    if (element && event && handler) {
+        element == null ? void 0 : element.addEventListener(event, handler, useCapture);
+    }
+}
+/**
+ * dom取消监听事件
+ * @param {*} element
+ * @param {*} event
+ * @param {*} handler
+ * @param {*} useCapture
+ */
+export function off(element, event, handler, useCapture = false) {
+    if (element && event && handler) {
+        element == null ? void 0 : element.removeEventListener(event, handler, useCapture);
+    }
+}
+
+/**
+ * 使用ResizeObserver 监听任意HTML元素尺寸变化
+ */
+import ResizeObserver from 'resize-observer-polyfill';
+
+export function addResizeListener(element, fn) {
+    if (!element) return;
+    if (!element.__resizeListeners__) {
+        element.__resizeListeners__ = [];
+        element.__ro__ = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                const listeners = entry.target.__resizeListeners__ || [];
+                if (listeners.length) {
+                    listeners.forEach((fn) => {
+                        fn();
+                    });
+                }
+            }
+        });
+        element.__ro__.observe(element);
+    }
+    element.__resizeListeners__.push(fn);
+}
+export function removeResizeListener(element, fn) {
+    var _a;
+    if (!element || !element.__resizeListeners__) return;
+    element.__resizeListeners__.splice(element.__resizeListeners__.indexOf(fn), 1);
+    if (!element.__resizeListeners__.length) {
+        (_a = element.__ro__) == null ? void 0 : _a.disconnect();
+    }
+}

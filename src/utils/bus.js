@@ -2,8 +2,7 @@
  * 组件之间的消息总线，用作组件间消息传递
  * @module utils/bus
  */
-import mitt from 'mitt'
-const emitter = mitt();
+import mitt from 'mitt';
 
 /**
  *  mitt 实例
@@ -15,7 +14,7 @@ const emitter = mitt();
  *  bus.emit('message', data)
  *
  *  B组件：
- *  import bus from '@/util/bus'
+ *  import bus from '@/utils/bus'
  *
  *  // 侦听事件
  *  bus.on('message', data => {
@@ -26,4 +25,4 @@ const emitter = mitt();
  *     bus.off('message', changeMsg)
  *  })
  */
-export default emitter;
+export default mitt();

@@ -46,14 +46,14 @@ export const removeMenu = (data) => axios({
 })
 
 /**
- * 获取菜单管理分页列表
+ * 获取菜单管理不分页列表
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
-export const pageMenu = (data) => axios({
+export const listMenu = (data) => axios({
 	method: 'get',
 	data: data,
-	url: API_HOST + '/system/menu/page'
+	url: API_HOST + '/system/menu/list'
 })
 
 /**
@@ -65,17 +65,6 @@ export const infoMenu = (data) => axios({
 	method: 'get',
 	data: data,
 	url: API_HOST + '/system/menu/info'
-})
-
-/**
- * 菜单管理字段去重校验
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const uniqueMenu = (data) => axios({
-	method: 'get',
-	data: data,
-	url: API_HOST + '/system/menu/unique'
 })
 
 /**
@@ -134,24 +123,12 @@ export const infoUser = (data) => axios({
 })
 
 /**
- * 用户管理字段去重校验
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const uniqueUser = (data) => axios({
-	method: 'get',
-	data: data,
-	url: API_HOST + '/system/user/unique'
-})
-
-/**
- * 用户管理导出
+ * 根据条件导出用户管理
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
 export const exportUser = (data) => axios({
 	method: 'get',
-	responseType: 'blob',
 	data: data,
 	url: API_HOST + '/system/user/export'
 })
@@ -212,17 +189,6 @@ export const infoDept = (data) => axios({
 })
 
 /**
- * 部门管理字段去重校验
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const uniqueDept = (data) => axios({
-	method: 'get',
-	data: data,
-	url: API_HOST + '/system/dept/unique'
-})
-
-/**
  * 获取操作日志分页列表
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
@@ -245,13 +211,12 @@ export const removeOperlog = (data) => axios({
 })
 
 /**
- * 操作日志导出
+ * 根据条件导出操作日志
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
 export const exportOperlog = (data) => axios({
 	method: 'get',
-	responseType: 'blob',
 	data: data,
 	url: API_HOST + '/system/operlog/export'
 })
@@ -279,13 +244,12 @@ export const removeLogininfor = (data) => axios({
 })
 
 /**
- * 登录日志导出
+ * 根据条件导出登录日志
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
 export const exportLogininfor = (data) => axios({
 	method: 'get',
-	responseType: 'blob',
 	data: data,
 	url: API_HOST + '/system/logininfor/export'
 })
@@ -346,30 +310,18 @@ export const infoTypedict = (data) => axios({
 })
 
 /**
- * 字典管理字段去重校验
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const uniqueTypedict = (data) => axios({
-	method: 'get',
-	data: data,
-	url: API_HOST + '/system/dict/type/unique'
-})
-
-/**
- * 字典管理导出
+ * 根据条件导出字典管理
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
 export const exportTypedict = (data) => axios({
 	method: 'get',
-	responseType: 'blob',
 	data: data,
 	url: API_HOST + '/system/dict/type/export'
 })
 
 /**
- * 新增字典管理
+ * 新增字典管理-详情
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
@@ -380,7 +332,7 @@ export const addDatadict = (data) => axios({
 })
 
 /**
- * 更新字典管理
+ * 更新字典管理-详情
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
@@ -391,7 +343,7 @@ export const editDatadict = (data) => axios({
 })
 
 /**
- * 删除字典管理
+ * 删除字典管理-详情
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
@@ -402,7 +354,7 @@ export const removeDatadict = (data) => axios({
 })
 
 /**
- * 获取字典管理分页列表
+ * 获取字典管理-详情分页列表
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
@@ -410,28 +362,6 @@ export const pageDatadict = (data) => axios({
 	method: 'get',
 	data: data,
 	url: API_HOST + '/system/dict/data/page'
-})
-
-/**
- * 获取字典管理单条信息详情
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const infoDatadict = (data) => axios({
-	method: 'get',
-	data: data,
-	url: API_HOST + '/system/dict/data/info'
-})
-
-/**
- * 字典管理字段去重校验
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const uniqueDatadict = (data) => axios({
-	method: 'get',
-	data: data,
-	url: API_HOST + '/system/dict/data/unique'
 })
 
 /**
@@ -490,24 +420,12 @@ export const infoRole = (data) => axios({
 })
 
 /**
- * 角色管理字段去重校验
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const uniqueRole = (data) => axios({
-	method: 'get',
-	data: data,
-	url: API_HOST + '/system/role/unique'
-})
-
-/**
- * 角色管理导出
+ * 根据条件导出角色管理
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
 export const exportRole = (data) => axios({
 	method: 'get',
-	responseType: 'blob',
 	data: data,
 	url: API_HOST + '/system/role/export'
 })
@@ -568,24 +486,12 @@ export const infoPost = (data) => axios({
 })
 
 /**
- * 岗位管理字段去重校验
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const uniquePost = (data) => axios({
-	method: 'get',
-	data: data,
-	url: API_HOST + '/system/post/unique'
-})
-
-/**
- * 岗位管理导出
+ * 根据条件导出岗位管理
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
 export const exportPost = (data) => axios({
 	method: 'get',
-	responseType: 'blob',
 	data: data,
 	url: API_HOST + '/system/post/export'
 })
@@ -635,6 +541,28 @@ export const pageConfig = (data) => axios({
 })
 
 /**
+ * 获取配置管理不分页列表
+ * @param {object} [data] 发送键值对数据
+ * @returns {promise}
+ */
+export const listConfig = (data) => axios({
+	method: 'get',
+	data: data,
+	url: API_HOST + '/system/config/list'
+})
+
+/**
+ * 根据条件导出配置管理
+ * @param {object} [data] 发送键值对数据
+ * @returns {promise}
+ */
+export const exportConfig = (data) => axios({
+	method: 'get',
+	data: data,
+	url: API_HOST + '/system/config/export'
+})
+
+/**
  * 获取配置管理单条信息详情
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
@@ -665,48 +593,4 @@ export const useDataConfig = (data) => axios({
 	method: 'get',
 	data: data,
 	url: API_HOST + '/system/config/use/data'
-})
-
-/**
- * 消息-更新已读
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const updateReaded = (data) => axios({
-	method: 'get',
-	data: data,
-	url: API_HOST + '/message/info/updateReaded'
-})
-
-/**
- * 删除消息-删除
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const removeMessage = (data) => axios({
-	method: 'delete',
-	data: data,
-	url: API_HOST + '/message/info/remove'
-})
-
-/**
- * 消息-未读
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const unReadCount = (data) => axios({
-	method: 'get',
-	data: data,
-	url: API_HOST + '/message/info/unReadCount'
-})
-
-/**
- * 获取消息-分页分页列表
- * @param {object} [data] 发送键值对数据
- * @returns {promise}
- */
-export const pageMessage = (data) => axios({
-	method: 'get',
-	data: data,
-	url: API_HOST + '/message/info/page'
 })

@@ -144,7 +144,7 @@ export function treeRevert(tree, idProp = 'id', childrenProp = 'children') {
  */
 export function treeDchildren(tree = [], field = 'children') {
     return tree.map((item) => {
-        if (item[field].length > 0) {
+        if (item[field]?.length > 0) {
             treeDchildren(item[field], field);
         } else {
             delete item[field];

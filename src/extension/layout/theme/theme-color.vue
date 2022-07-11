@@ -1,49 +1,35 @@
 <template>
-    <el-tooltip class="item" effect="dark" :content="tip" placement="top">
+    <el-tooltip class="item" :content="tip" placement="top">
         <div class="theme-color" :style="{ 'background-color': color }" @click="handleClick">
             <div class="active" v-if="active === color">
-                <i class="el-icon-check" :style="{ color: textColor }"></i>
+                <el-icon :style="{ color: textColor }">
+                    <Check />
+                </el-icon>
             </div>
         </div>
     </el-tooltip>
 </template>
 
-<script>
-import { defineComponent } from 'vue';
-export default defineComponent({
-    props: {
-        active: {
-            type: String,
-            default: '',
-        },
-        activeTextColor: {
-            type: String,
-            default: '',
-        },
-        tip: {
-            type: String,
-            default: '默认蓝',
-        },
-        color: {
-            type: String,
-            default: '#409eff',
-        },
-        textColor: {
-            type: String,
-            default: '#fff',
-        },
+<script setup name="themeColor">
+const props = defineProps({
+    active: {
+        type: String,
+        default: '',
     },
-    setup(props, ctx) {
-        // 点击事件，触发v-model修改active值
-        const handleClick = () => {
-            ctx.emit('update:active', props.color);
-            ctx.emit('update:activeTextColor', props.textColor);
-        };
-        return {
-            handleClick,
-        };
+    tip: {
+        type: String,
+        default: '默认蓝',
+    },
+    color: {
+        type: String,
+        default: '#409eff',
     },
 });
+const emit = defineEmits(['update:active']);
+// 点击事件，触发v-model修改active值
+const handleClick = () => {
+    emit('update:active', props.color);
+};
 </script>
 
 <style lang="scss" scoped>

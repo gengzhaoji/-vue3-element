@@ -1,15 +1,20 @@
-import { defineConfig, loadEnv, UserConfigExport, ConfigEnv } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
-// 兼容插件
-import legacy from '@vitejs/plugin-legacy';
 // html内容调整 插件
-import html from 'vite-plugin-html';
+import { createHtmlPlugin } from 'vite-plugin-html';
 // 压缩插件
 import viteCompression from 'vite-plugin-compression';
 // ui自动导入插件
 import Components from 'unplugin-vue-components/vite';
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
+// setup name 增强
+import VueSetupExtend from 'vite-plugin-vue-setup-extend';
+// 自动导入composition api
+import AutoImport from 'unplugin-auto-import/vite';
+// vite首次打开界面加载慢问题/解决
+import OptimizationPersist from 'vite-plugin-optimize-persist';
+import PkgConfig from 'vite-plugin-package-config';
 
 // https://vitejs.dev/config/
 export default ({ command, mode }) => {
@@ -19,16 +24,25 @@ export default ({ command, mode }) => {
     const isEnvProduction = mode === 'production';
     // vite插件
     const plugins = [
-        vue(),
+        vue({
+            script: {
+                refSugar: true,
+            },
+        }),
+        VueSetupExtend(),
         /**
          *  注入环境变量到html模板中
          *  如在  .env文件中有环境变量  VITE_APP_TITLE=admin
          *  则在 html模板中  可以这样获取  <%- VITE_APP_TITLE %>
          *  文档：  https://github.com/anncwb/vite-plugin-html
          */
-        html({
+        createHtmlPlugin({
             inject: {
-                injectData: { title: '保密系统', injectAMapScript: `<script src="/config.js?v=${new Date().getTime()}"></script>`, ...env },
+                data: {
+                    TITLE: 'MY-UI',
+                    injectConfigScript: `<script src="/config.js?v=${new Date().getTime()}"></script>`,
+                    ...env,
+                },
             },
             minify: true,
         }),
@@ -36,24 +50,26 @@ export default ({ command, mode }) => {
          * ui按需加载(自动导入)自动导入Vite的按需组件
          */
         Components({
-            resolvers: [ElementPlusResolver()],
+            resolvers: [ElementPlusResolver({ importStyle: 'css' })],
             include: [/\.vue$/, /\.vue\?vue/],
             exclude: [/[\\/]node_modules[\\/]/, /[\\/]\.git[\\/]/, /[\\/]\.nuxt[\\/]/],
         }),
+        AutoImport({
+            imports: ['vue', 'vue-router'], // 自动导入vue和vue-router相关函数
+            dts: 'src/auto-import.d.js', // 生成 `auto-import.d.js` 全局声明
+        }),
+        PkgConfig(),
+        OptimizationPersist(),
     ];
     if (isEnvProduction) {
         plugins.push(
-            // 兼容插件
-            legacy({
-                targets: ['defaults', 'not IE 11'],
-            }),
             // gzip插件，打包压缩代码成gzip  文档： https://github.com/anncwb/vite-plugin-compression
             viteCompression()
         );
     }
     return defineConfig({
         // 基础路径，配合vue-router的createWebHashHistory使用
-        base: isEnvProduction ? './' : './',
+        base: isEnvProduction ? './' : '/',
         css: {
             // 消除vite2打包出现警告，"@charset" must be the first，
             preprocessorOptions: {
@@ -105,7 +121,6 @@ export default ({ command, mode }) => {
         },
         // 打包环境
         build: {
-            target: 'es2015',
             outDir: 'dist',
             assetsInlineLimit: 1024,
             cssCodeSplit: true,

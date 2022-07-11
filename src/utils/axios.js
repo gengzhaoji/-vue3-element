@@ -11,7 +11,7 @@ import date from '@u/date';
 import qs from 'qs';
 
 // vuex数据
-import store from '@/store';
+import user from '@/store/user';
 
 import router from '@/router';
 
@@ -19,12 +19,14 @@ import { compile } from 'path-to-regexp';
 
 import { getHost } from './url';
 
+import { downloadBlob } from '@u/download';
+
 // AJAX_SUCCESS
 import { AJAX_SUCCESS } from '@/config';
 
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElLoading } from 'element-plus';
 
-import { downloadBlob } from '@u/download';
+import { nextTick } from 'vue';
 
 // 请求错误自定义
 const errorCode = {
@@ -34,8 +36,9 @@ const errorCode = {
     default: '系统未知错误,请反馈给管理员',
 };
 
-// 编译过的url缓存
-let pathToRegexCaches = {};
+// 编译过的url缓存 全局loading
+let pathToRegexCaches = {},
+    loadingInstance;
 
 // 请求存储
 const axiosPromiseArr = new Map();
@@ -99,10 +102,23 @@ function createKey(config) {
 service.interceptors.request.use(
     (config) => {
         // 是否需要设置 token
-        const isToken = (config.headers || {}).isToken === false;
-        if (store.state.user.token && !isToken) {
-            config.headers['Authorization'] = 'Bearer ' + store.state.user.token; // 让每个请求携带自定义token 请根据实际情况自行修改
+        const isToken = (config.headers || {}).isToken === false,
+            { token, une } = user();
+        if (token && !isToken) {
+            config.headers['Authorization'] = 'Bearer ' + token; // 让每个请求携带自定义token
         }
+
+        // 创建全局loading，排除不需要loading的接口
+        if (axiosPromiseArr.size === 0 && !['/auth/login', '/auth/logout', '/captcha/image', '/system/user/profile/info', '/home/routers'].includes(config.url)) {
+            loadingInstance = ElLoading.service({
+                text: '拼命加载中',
+                target: '#ContentArea',
+            });
+        }
+
+        // 联合登陆携带une
+        if (une) config.headers['une'] = une;
+
         /**
          * 请求未完成时保存取消的cancelToken
          */
@@ -115,17 +131,14 @@ service.interceptors.request.use(
                 axiosPromiseArr.set(key, cancel);
             }
         });
-        if (config.method === 'get') {
-            config.paramsSerializer = function (params) {
-                return qs.stringify(params, { arrayFormat: 'comma' });
-            };
-        }
+
+        // get请求参数转换
+        if (config.method === 'get') config.paramsSerializer = (params) => qs.stringify(params, { arrayFormat: 'comma' });
+
         return config;
     },
     (error) => {
-        ElMessage.error({
-            message: '加载超时',
-        });
+        ElMessage.error({ message: '加载超时' });
         return Promise.reject(error);
     }
 );
@@ -135,26 +148,42 @@ service.interceptors.response.use(
     (res) => {
         // 请求成功后从正在进行的请求数组中删除
         const key = createKey(res.config);
-        if (axiosPromiseArr.has(key)) {
-            axiosPromiseArr.delete(key);
+        if (axiosPromiseArr.has(key)) axiosPromiseArr.delete(key);
+        // 全部请求结束关闭loading
+        if (axiosPromiseArr.size === 0) {
+            nextTick(() => {
+                loadingInstance?.close();
+            });
         }
         // 未设置状态码则默认成功状态
         const code = (res.data && res.data.code) || AJAX_SUCCESS;
+
         // 获取错误信息
         const msg = errorCode[code] || (res.data && res.data.msg) || errorCode['default'];
-        if (code === 401) {
-            // store.dispatch('LogOut').then(() => {
-            //     router.replace({
-            //         path: '/login',
-            //         query: {
-            //             redirect: router.currentRoute.fullPath,
-            //         },
-            //     });
-            // });
+
+        if ([401, 418].includes(code)) {
             cancelFn();
+            if (code === 418) {
+                user().LogOutSET();
+                router.replace('/login');
+                ElMessage.error(msg);
+            }
+            if (code === 401) {
+                user()
+                    .LogOut()
+                    .then(() => {
+                        router.replace({
+                            path: '/login',
+                            query: {
+                                redirect: router.currentRoute.fullPath,
+                            },
+                        });
+                    });
+                ElMessage.error(msg);
+            }
         } else if (code !== 200) {
             ElMessage.error(msg);
-            return Promise.reject('error');
+            return Promise.reject(res.data);
         } else {
             return Promise.resolve(res.data);
         }
@@ -190,6 +219,8 @@ export function cancelFn() {
         cancel();
     }
     axiosPromiseArr.clear();
+    // 关闭全局loading
+    loadingInstance?.close();
 }
 
 /**
@@ -200,9 +231,8 @@ export function cancelFn() {
  * currency是否默认添加时间戳
  */
 export function downloadPost({ url, fileName, data, currency = false } = {}) {
-    let options = {
-        responseType: 'blob',
-    };
+    let options = { responseType: 'blob' };
+
     return service
         .post(url, data, options)
         .then((data) => {
@@ -295,9 +325,13 @@ export default function (options) {
     }
 
     let { url, method, data } = config;
-
+    // page接口默认添加needCount：1，需要总数
     if (config.url.split('/').pop() === 'page') {
         data = Object.assign({ needCount: 1 }, data || {});
+    }
+    // export接口默认responseType = 'blob'
+    if (config.url.split('/').pop() === 'export') {
+        config.responseType = 'blob';
     }
 
     // 从缓存中提取已经解析过的url
