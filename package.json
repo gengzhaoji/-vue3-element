@@ -5,7 +5,10 @@
     "dev": "vite --mode",
     "build": "vite build",
     "serve": "vite preview",
-    "coder": "node coder/index.js"
+    "coder": "node coder/index.js",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs"
   },
   "dependencies": {
     "@element-plus/icons": "^0.0.11",
@@ -43,6 +46,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.2.0",
+    "gatsby-plugin-sass": "^5.18.1",
     "js-beautify": "^1.14.0",
     "sass": "^1.49.9",
     "unplugin-auto-import": "^0.6.6",
@@ -54,6 +58,8 @@
     "vite-plugin-optimize-persist": "^0.1.2",
     "vite-plugin-package-config": "^0.1.1",
     "vite-plugin-vue-setup-extend": "^0.4.0",
+    "vitepress": "1.0.0-alpha.4",
+    "vitepress-theme-demoblock": "^1.4.2",
     "vue-global-api": "^0.4.1"
   }
 }
