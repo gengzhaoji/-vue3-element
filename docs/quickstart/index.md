@@ -20,4 +20,10 @@ gz init [项目名]
 选择vue3 + element基础模板,随后选择包管理安装项目依赖
 ```
 
+### 生成pai
+
+```
+npm run coder (api[生成pai]/icon[生成icon])
+```
+
 

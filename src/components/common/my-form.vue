@@ -1,6 +1,5 @@
 <template>
     <el-form
-        :id="MyFormId"
         ref="refMyForm"
         @keyup.enter="query ? $emit('searchFn') : ''"
         :rules="defaultRules"
@@ -128,27 +127,25 @@
                 <!-- 查询form表单默认按钮 -->
                 <template v-if="query && ((index === currentColumn - 1 && formItem.length > currentColumn) || (formItem.length <= currentColumn && index === formItem.length - 1))">
                     <slot>
-                        <el-form-item class="query-form-item">
-                            <div :id="MyFormQueryId">
-                                <my-button class="el-button--primary" icon="Search" @click.prevent="$emit('searchFn')">搜 索</my-button>
-                                <my-button
-                                    icon="Refresh"
-                                    @click.prevent="
-                                        resetForm(refMyForm);
-                                        $emit('resetFn');
-                                    "
-                                    >重 置</my-button
-                                >
-                                <template v-if="collapsible && formItem.length > currentColumn">
-                                    <my-button class="m-l-20" link type="primary" @click.stop.prevent="currentCollapsed = !currentCollapsed">
-                                        {{ currentCollapsed ? '展开' : '收起' }}
-                                        <el-icon>
-                                            <arrow-down v-show="currentCollapsed" />
-                                            <arrow-up v-show="!currentCollapsed" />
-                                        </el-icon>
-                                    </my-button>
-                                </template>
-                            </div>
+                        <el-form-item class="query-form-item" id="MyFormQuery">
+                            <my-button class="el-button--primary" icon="Search" @click.prevent="$emit('searchFn')">搜 索</my-button>
+                            <my-button
+                                icon="Refresh"
+                                @click.prevent="
+                                    resetForm(refMyForm);
+                                    $emit('resetFn');
+                                "
+                                >重 置</my-button
+                            >
+                            <template v-if="collapsible && formItem.length > currentColumn">
+                                <my-button class="m-l-20" link type="primary" @click.stop.prevent="currentCollapsed = !currentCollapsed">
+                                    {{ currentCollapsed ? '展开' : '收起' }}
+                                    <el-icon>
+                                        <arrow-down v-show="currentCollapsed" />
+                                        <arrow-up v-show="!currentCollapsed" />
+                                    </el-icon>
+                                </my-button>
+                            </template>
                         </el-form-item>
                     </slot>
                 </template>
@@ -158,27 +155,16 @@
 </template>
 
 <script setup name="myForm">
-import { addResizeListener, removeResizeListener } from '@u/dom';
+import { useElementSize } from '@vueuse/core';
 import _camelCase from 'lodash/camelCase';
-import { throttle, guid } from '@u/util';
-const $vm = inject('$vm'),
-    refMyForm = $ref(null),
-    MyFormId = `MyFormId${guid()}`,
-    MyFormQueryId = `MyFormQueryId${guid()}`;
-const calcBreakPoint = function (width) {
-    if (width <= 800) {
-        return 1;
-    } else if (width >= 800 && width <= 1171) {
-        return 2;
-    } else if (width >= 1172 && width <= 1379) {
-        return 3;
-    } else if (width >= 1380 && width <= 1779) {
-        return 4;
-    } else if (width >= 1780) {
-        return 5;
-    }
-};
 
+const $vm = inject('$vm'),
+    $attrs = useAttrs(),
+    refMyForm = ref(null),
+    MyFormWidth = useElementSize(refMyForm).width;
+
+// 查询功能的宽度
+let queryWidth = $ref(220);
 /***
  * props
  * @property {Array} formItem 生成form表单的配置数组
@@ -192,74 +178,89 @@ const calcBreakPoint = function (width) {
  * @property {boolean} [colFlag=false] 是否开启表单响应式
  */
 const props = defineProps({
-    formItem: {
-        type: Array,
-        required: true,
-    },
-    query: {
-        type: Boolean,
-        default: false,
-    },
-    rules: {
-        type: Object,
-        default: () => ({}),
-    },
-    columns: {
-        type: Number,
-        default: 3,
-    },
-    listenEl: {
-        type: Boolean,
-        default: true,
-    },
-    collapsible: {
-        type: Boolean,
-        default: true,
-    },
-    collapsed: {
-        type: Boolean,
-        default: true,
-    },
-    detail: {
-        type: Boolean,
-        default: false,
-    },
-    colFlag: {
-        type: Boolean,
-        default: false,
-    },
-});
-
-const queryWidth = $ref(220);
-let currentColumn = $ref(props.columns);
-// 当前的折叠状态
-const currentCollapsed = $ref(props.collapsed);
-const defaultRules = computed(() => {
-    if (!props.query && !props.detail) {
-        let rules = Object.create(null);
-        props.formItem.forEach((item) => {
-            if (!!item.required) {
-                rules[item.prop] = {
-                    required: true,
-                    message: `${item.label}不能为空`,
-                    trigger: item.trigger ? item.trigger : ['cascader', 'select', 'date', 'file', 'img'].includes(item.itemType) ? 'change' : 'blur',
-                };
-            }
+        formItem: {
+            type: Array,
+            required: true,
+        },
+        query: {
+            type: Boolean,
+            default: false,
+        },
+        rules: {
+            type: Object,
+            default: () => ({}),
+        },
+        columns: {
+            type: Number,
+            default: 3,
+        },
+        listenEl: {
+            type: Boolean,
+            default: true,
+        },
+        collapsible: {
+            type: Boolean,
+            default: true,
+        },
+        collapsed: {
+            type: Boolean,
+            default: true,
+        },
+        detail: {
+            type: Boolean,
+            default: false,
+        },
+        colFlag: {
+            type: Boolean,
+            default: false,
+        },
+    }),
+    // 一行显示的form-item数量
+    currentColumn = $computed(() => {
+        const width = MyFormWidth.value;
+        nextTick(() => {
+            queryWidth = document.getElementById('MyFormQuery')?.getBoundingClientRect().width || queryWidth;
         });
-        return Object.assign(rules, props.rules);
-    } else {
-        return {};
-    }
-});
-let itemWidth = computed(() => `calc(${100 / currentColumn}% - ${10 + (queryWidth + 1) / currentColumn}px) !important`);
-let formItemLen = computed(() => props.formItem.length);
-
-// 是否使用el-row布局进行响应式页面
-const $attrs = useAttrs();
-const row = computed(() => {
-    if (!!$attrs.row || props.formItem.some((item) => !!item.col) || props.colFlag) return true;
-    return false;
-});
+        if (props.listenEl && props.query) {
+            if (width <= 800) {
+                return 1;
+            } else if (width >= 800 && width <= 1171) {
+                return 2;
+            } else if (width >= 1172 && width <= 1379) {
+                return 3;
+            } else if (width >= 1380 && width <= 1779) {
+                return 4;
+            } else if (width >= 1780) {
+                return 5;
+            }
+        } else {
+            return props.columns;
+        }
+    }),
+    // 当前的折叠状态
+    currentCollapsed = $ref(props.collapsed),
+    // 默认必填
+    defaultRules = $computed(() => {
+        if (!props.query && !props.detail) {
+            let rules = Object.create(null);
+            props.formItem.forEach((item) => {
+                if (!!item.required) {
+                    rules[item.prop] = {
+                        required: true,
+                        message: `${item.label}不能为空`,
+                        trigger: item.trigger ? item.trigger : ['cascader', 'select', 'date', 'file', 'img'].includes(item.itemType) ? 'change' : 'blur',
+                    };
+                }
+            });
+            return Object.assign(rules, props.rules);
+        } else {
+            return {};
+        }
+    }),
+    // form-item宽度
+    itemWidth = $computed(() => `calc(${100 / currentColumn}% - ${10 + (queryWidth + 1) / currentColumn}px) !important`),
+    // 是否使用el-row布局进行响应式页面
+    row = $computed(() => !!$attrs.row || props.formItem.some((item) => !!item.col) || props.colFlag);
 
 // form-item的参数处理逻辑
 function itemFn(item) {
@@ -272,35 +273,17 @@ function itemFn(item) {
     delete date.required;
     return date;
 }
-
 // 下拉选择框详情显示Label函数
 function DictLabelFn(item) {
     const dictType = item.type || (item.code && `GET${_camelCase(item.code)}`);
     if (dictType) ($vm.$store?.dict[dictType] || $vm.$store?.com[dictType])();
 }
-
-let setupElResponsiveProxy, $el;
-function setupElResponsive() {
-    currentColumn = calcBreakPoint($el.offsetWidth);
-    queryWidth = document.getElementById(MyFormQueryId)?.offsetWidth || queryWidth;
-}
-onMounted(() => {
-    $el = document.getElementById(MyFormId);
-    if (props.listenEl && props.query) {
-        setupElResponsiveProxy = throttle(setupElResponsive, true);
-        addResizeListener($el, setupElResponsiveProxy);
-    }
-});
-onBeforeUnmount(() => {
-    if (props.listenEl && props.query) removeResizeListener($el, setupElResponsiveProxy);
-});
 </script>
 
 <style lang="scss" scoped>
 .query {
     :deep(.el-input__inner) {
         width: 100%;
-        max-width: 500px;
     }
     .query-form-item {
         margin-right: 0 !important;

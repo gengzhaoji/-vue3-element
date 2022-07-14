@@ -1,15 +1,15 @@
 <template>
-    <div class="echarts" ref="refChart" :style="styles" :id="myEchartsId"></div>
+    <div class="echarts" ref="myEcharts" :style="styles"></div>
 </template>
 
 <script setup name="myEcharts">
+import { useResizeObserver } from '@vueuse/core';
+
 /**
  * ECharts组件, 提供Vue组件封装，异步加载echarts库,
  * @module widgets/my-echarts
  * @author 耿朝继
  */
-// import * as echarts from 'echarts';
-
 // 引入 echarts 核心模块，核心模块提供了 echarts 使用必须要的接口。
 import * as echarts from 'echarts/core';
 
@@ -25,9 +25,6 @@ import { LabelLayout, UniversalTransition } from 'echarts/features';
 // 引入 Canvas 渲染器，注意引入 CanvasRenderer 或者 SVGRenderer 是必须的一步
 import { CanvasRenderer } from 'echarts/renderers';
 
-import { addResizeListener, removeResizeListener } from '@u/dom';
-import { debounce } from '@/utils/util';
-import { guid } from '@u/util';
 import EVENTS from './EVENTS';
 
 // 注册必须的组件
@@ -64,8 +61,7 @@ function createToggleFeature(isFullscreen, clickHandler) {
     };
 }
 
-const $emit = defineEmits(EVENTS),
-    myEchartsId = `myEchartsId${guid()}`;
+const $emit = defineEmits(EVENTS);
 /**
  * 参数属性
  * @property {object} [geo] 需要注册的地图geoJson， 目录 /widgets/my-echarts/map 下包含全国各地的地图
@@ -147,7 +143,7 @@ function registerMap() {
  * 初始化图表，实例化ECharts
  */
 function init(el) {
-    chart = echarts.init(el || document.getElementById(myEchartsId));
+    chart = echarts.init(el || myEcharts.value);
     props.group && setGroup(props.group);
     setLoading(props.loading);
     EVENTS.forEach((name) => {
@@ -213,7 +209,7 @@ function toggleFullscreen() {
     isFullscreen = !isFullscreen;
     isFullscreen ? showFullscreen() : closeFullscreen();
 }
-let copyDiv, copyWrapper, copyChart, proxyResize;
+let copyDiv, copyWrapper, copyChart;
 function showFullscreen() {
     const div = document.createElement('div');
     const wrapper = document.createElement('div');
@@ -237,27 +233,25 @@ function showFullscreen() {
     document.body.appendChild(wrapper);
     init(div);
     setOption(props.options);
-    addResizeListener(div, proxyResize);
 }
 function closeFullscreen() {
     if (copyDiv) {
-        removeResizeListener(copyDiv, proxyResize);
         chart?.dispose();
         chart = copyChart;
     }
     if (copyWrapper) copyWrapper.parentNode.removeChild(copyWrapper);
 }
 // 初始化逻辑
-proxyResize = debounce(resize, 100, false);
+const myEcharts = ref(null);
+useResizeObserver(myEcharts, resize);
+
 registerMap();
 onMounted(() => {
     init();
     setOption(props.options);
-    addResizeListener(document.getElementById(myEchartsId), proxyResize);
 });
 onBeforeUnmount(() => {
     chart?.dispose?.();
-    removeResizeListener(document.getElementById(myEchartsId), proxyResize);
 });
 onActivated(() => {
     active = true;

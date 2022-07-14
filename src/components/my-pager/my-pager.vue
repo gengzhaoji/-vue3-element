@@ -1,8 +1,8 @@
 <template>
-    <div class="my-pager f0" v-show="visible" :id="myPagerId">
+    <div class="my-pager f0" v-show="visible">
         <el-pagination
             :small="small"
-            ref="pager"
+            ref="myPager"
             :background="background"
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
@@ -21,6 +21,7 @@
 </template>
 
 <script setup name="myPager">
+import { useElementSize } from '@vueuse/core';
 /**
  * pager 分页组件
  * @module components/my-pager
@@ -35,12 +36,8 @@
  * @member slot
  * @property {string} [default] 自定义页码内容
  */
-import { addResizeListener, removeResizeListener } from '@u/dom';
-import { throttle } from '@u/util';
-import { guid } from '@u/util';
-
 const $emit = defineEmits(['size-change', 'update:page', 'current-change']),
-    myPagerId = `myPagerId${guid()}`;
+    myPager = ref(null);
 /**
  * 属性参数
  * @property {Array} [sizes = [10, 20, 50, 100]] 每页显示个数选择器的选项设置
@@ -53,60 +50,68 @@ const $emit = defineEmits(['size-change', 'update:page', 'current-change']),
  * @property {Boolean} [background = true] 控制 分页器的 页码按钮 是否有 背景色
  */
 const layouts = {
-    full: 'total,sizes, ->, prev, pager, next, jumper',
-    small: 'total,sizes, ->, prev, next, jumper',
-    mini: 'total,sizes,->,prev,pager, next',
-    simple: 'prev, pager, next',
-    tiny: 'prev,slot,next',
-};
-const props = defineProps({
-    sizes: {
-        type: Array,
-        default() {
-            return [5, 10, 20, 30, 50, 100];
+        full: 'total,sizes, ->, prev, pager, next, jumper',
+        small: 'total,sizes, ->, prev, next, jumper',
+        mini: 'total,sizes,->,prev,pager, next',
+        simple: 'prev, pager, next',
+        tiny: 'prev,slot,next',
+    },
+    props = defineProps({
+        sizes: {
+            type: Array,
+            default() {
+                return [5, 10, 20, 30, 50, 100];
+            },
         },
-    },
-    layout: {
-        type: String,
-        default: 'total,sizes, ->, prev, pager, next, jumper',
-    },
-    size: {
-        type: Number,
-        default: 20,
-    },
-    total: {
-        type: Number,
-        default: 0,
-    },
-    page: {
-        type: Number,
-        default: 1,
-    },
-    autoLayout: {
-        type: Boolean,
-        default: false,
-    },
-    background: {
-        type: Boolean,
-        default: true,
-    },
-    small: {
-        type: Boolean,
-        default: false,
-    },
-});
-// 是否显示
-let visible = computed(() => props.total * 1 > 0);
-// 计算总页数
-let pageCount = computed(() => (props.total > 0 ? Math.ceil(props.total / props.size) : 0));
-// 布局配置
-let currentLayout = $ref(layouts[props.layout] || props.layout);
+        layout: {
+            type: String,
+            default: 'total,sizes, ->, prev, pager, next, jumper',
+        },
+        size: {
+            type: Number,
+            default: 20,
+        },
+        total: {
+            type: Number,
+            default: 0,
+        },
+        page: {
+            type: Number,
+            default: 1,
+        },
+        autoLayout: {
+            type: Boolean,
+            default: false,
+        },
+        background: {
+            type: Boolean,
+            default: true,
+        },
+        small: {
+            type: Boolean,
+            default: false,
+        },
+    }),
+    // 是否显示
+    visible = $computed(() => props.total * 1 > 0),
+    // 计算总页数
+    pageCount = $computed(() => (props.total > 0 ? Math.ceil(props.total / props.size) : 0)),
+    // 布局配置
+    currentLayout = $ref(layouts[props.layout] || props.layout);
+
+// 显示的时候监听组件宽度
+if (visible) {
+    const { width } = useElementSize(myPager);
+    currentLayout = width.value >= 800 ? layouts.full : layouts.mini;
+}
+
 watch(
     () => props.layout,
     (val) => {
         currentLayout = layouts[val] || val;
     }
 );
+
 /**
  * 分页器单页显示数量改变的事件 （@size-change）
  * @event size-change
@@ -124,22 +129,4 @@ function handleCurrentChange(val) {
     $emit('update:page', val);
     $emit('current-change', val);
 }
-const changeLayout = throttle(() => {
-    const rect = document.getElementById(myPagerId)?.getBoundingClientRect();
-    if (rect?.width >= 800) {
-        currentLayout = layouts.full;
-    } else {
-        currentLayout = layouts.mini;
-    }
-}, true);
-onMounted(() => {
-    /**
-     * 组件生成后，若‘autoLayout’开启，将 el-pagination组件内部的‘proxyChangeLayout’方法指向自己定义的‘changeLayout()’方法，并监听组建的resize事件（调用ele-ui内部的‘addResizeListener’方法）
-     * @member mounted
-     */
-    if (props.autoLayout) addResizeListener(document.getElementById(myPagerId), changeLayout);
-});
-onBeforeUnmount(() => {
-    if (props.autoLayout) removeResizeListener(document.getElementById(myPagerId), changeLayout);
-});
 </script>

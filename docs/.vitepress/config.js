@@ -3,6 +3,16 @@ module.exports = {
     description: 'vue3+element-plus二次封装',
     lang: 'en-US',
     themeConfig: {
+        head: [
+            // 改变title的图标
+            [
+                'link',
+                {
+                    rel: 'icon',
+                    href: '/favicon.ico',
+                },
+            ],
+        ],
         // 展示搜索框
         algolia: {
             appKey: '',
@@ -24,6 +34,10 @@ module.exports = {
                     {
                         text: '快速开始',
                         link: '/quickstart/',
+                    },
+                    {
+                        text: '自动化API',
+                        link: '/coder/',
                     },
                 ],
             },
@@ -47,7 +61,3 @@ module.exports = {
         },
     },
 };
-
-function getDemoSidebar() {
-    return;
-}

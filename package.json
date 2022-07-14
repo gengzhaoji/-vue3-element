@@ -34,7 +34,6 @@
     "pinia": "^2.0.12",
     "pinia-plugin-persist": "^1.0.0",
     "qs": "^6.10.3",
-    "resize-observer-polyfill": "^1.5.1",
     "snabbdom": "^3.5.0",
     "sortablejs": "^1.14.0",
     "vue": "^3.2.31",

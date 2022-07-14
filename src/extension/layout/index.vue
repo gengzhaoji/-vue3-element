@@ -121,10 +121,11 @@ import Tabs from './Tabs.vue';
 import Screen from './Screen.vue';
 import Setting from './Setting.vue';
 import { TITLE } from '@/config';
+import { useWindowSize } from '@vueuse/core';
+const { width: screenWidth } = useWindowSize();
 
 const $vm = inject('$vm'),
     $route = useRoute(),
-    screenWidth = inject('screenWidth'),
     { theme, userInfo } = $vm.$store.user;
 
 let collapse = $ref(false),
