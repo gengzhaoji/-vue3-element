@@ -207,3 +207,22 @@ export function guid() {
         })
         .toUpperCase();
 }
+
+// transitionGroup切换定义参数函数
+import { customRef } from 'vue';
+export function transitionGroupRef(value, delay = 300) {
+    return customRef((track, trigger) => ({
+        get() {
+            track();
+            return value;
+        },
+        set(newValue) {
+            value = null;
+            trigger();
+            setTimeout(() => {
+                value = newValue;
+                trigger();
+            }, delay);
+        },
+    }));
+}

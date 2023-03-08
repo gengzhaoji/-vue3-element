@@ -37,7 +37,7 @@
                         <el-button-group>
                             <my-button-export :load="Export" v-hasPermi="['system:dict:export']" />
                         </el-button-group>
-                        <my-button type="danger" v-show="tableSelection.length" @click.prevent="Delete" icon="Delete" v-hasPermi="['system:dict:remove']"> 删 除 </my-button>
+                        <my-button type="danger" :disabled="!tableSelection.length" @click.prevent="Delete" icon="Delete" v-hasPermi="['system:dict:remove']"> 删 除 </my-button>
                     </div>
                     <my-list-panel ref="table" :loadFn="loadData" :total="state.total">
                         <my-table :data="state.list" :columns="state.columns" @selection-change="(val) => (tableSelection = val)">
@@ -72,10 +72,8 @@
                         </el-form-item>
                     </el-form>
                     <template #footer>
-                        <div class="dialog-footer">
-                            <my-button type="primary" @click.prevent="submitForm"> 确 定 </my-button>
-                            <my-button @click.prevent="dialog.open = false">取 消</my-button>
-                        </div>
+                        <my-button @click.prevent="dialog.open = false">取 消</my-button>
+                        <my-button type="primary" @click.prevent="submitForm()">确 定</my-button>
                     </template>
                 </el-dialog>
             </div>
@@ -227,11 +225,7 @@ function Delete() {
         .then(() => {
             removeTypedict({ ids: tableSelection.map((item) => item.id).join() }).then(() => {
                 if (tableSelection.length === state.list.length) {
-                    if (table.lastcurrentPage) {
-                        table.reload();
-                    } else {
-                        table.loadData();
-                    }
+                    table?.prevFn?.();
                 } else {
                     table.loadData();
                 }

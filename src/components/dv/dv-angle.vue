@@ -9,6 +9,7 @@
 </template>
 
 <script setup name="DvAngle"></script>
+
 <style scoped lang="scss">
 $jiao-width: 14px;
 $jiao-color: #168ae4;

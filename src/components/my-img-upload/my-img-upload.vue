@@ -34,13 +34,13 @@
             </template>
             <!-- 提示说明文字 -->
             <template #tip v-if="!myImgUploadDisabled">
-                <div style="color: #858ebd">单张图片不超过10M</div>
+                <div style="color: #858ebd">单张图片不超过 {{ fileSize }} M</div>
             </template>
         </el-upload>
     </div>
 </template>
 
-<script setup name="myImgUpload">
+<script setup name="MyImgUpload">
 /**
  * 请求接口
  */
@@ -52,6 +52,8 @@ const emits = defineEmits(['update:modelValue']),
     elForm = inject(elFormKey, {}),
     elFormItem = inject(elFormItemKey, {}),
     $vm = inject('$vm'),
+    upload = ref(null),
+    fileType = ['png', 'jpg', 'jpeg'],
     /***
      * props
      * @property {Array} modelValue v-model绑定的值，
@@ -63,7 +65,7 @@ const emits = defineEmits(['update:modelValue']),
         modelValue: [Array],
         fileSize: {
             type: Number,
-            default: 100,
+            default: 10,
         },
         download: {
             type: Boolean,
@@ -76,35 +78,32 @@ const emits = defineEmits(['update:modelValue']),
     });
 
 // 是否禁用上传功能
-let myImgUploadDisabled = $computed(() => props.disabled || elForm?.disabled),
-    // 文件上传弹窗数据
-    dialogImageUrl = $ref(''),
-    dialogVisible = $ref(false),
-    upload = $ref(null),
-    fileList = $ref([]),
-    fileType = ['png', 'jpg', 'jpeg'];
-// 是否显示提示
+let myImgUploadDisabled = computed(() => props.disabled || elForm?.disabled),
+    fileList = computed(() => {
+        return (
+            props.modelValue.map((item) => ({
+                id: item.id,
+                downloadUrl: item.downloadUrl,
+                fileName: item.fileName,
+                fileSizeFormat: item.fileSizeFormat,
+                fileSize: item.fileSize,
+                fileSuffix: item.fileSuffix,
+            })) || []
+        );
+    });
 watch(
-    () => props.modelValue,
+    () => fileList,
     (val) => {
-        if (val)
-            fileList =
-                val?.map((item) => ({
-                    id: item.id,
-                    downloadUrl: item.downloadUrl,
-                    fileName: item.fileName,
-                    fileSizeFormat: item.fileSizeFormat,
-                    fileSize: item.fileSize,
-                })) || [];
-    },
-    { deep: true, immediate: true }
+        emits('update:modelValue', val);
+        elForm.validateField(elFormItem.prop);
+    }
 );
 // 文件超出个数限制时的钩子
 function exceedFn(files) {
-    upload.clearFiles();
+    unref(upload).clearFiles();
     const file = files[0];
     file.uid = genFileId();
-    upload.handleStart(file);
+    unref(upload).handleStart(file);
 }
 // 文件上传
 function handleChange(data) {
@@ -113,21 +112,19 @@ function handleChange(data) {
             let formdata = new FormData();
             formdata.append('file', data.raw);
             rdfileDataUpload(formdata).then((res) => {
-                if (props.limit === 1) fileList = [];
+                if (props.limit === 1) fileList.value = [];
                 nextTick(() => {
-                    fileList.push({
+                    fileList.value.push({
                         id: res.data.id,
                         downloadUrl: res.data.downloadUrl,
                         fileName: res.data.fileName.split('.')[0],
                         fileSizeFormat: res.data.fileSizeFormat,
                         fileSize: res.data.fileSize,
                     });
-                    updateFn();
                 });
             });
         } else {
-            if (props.limit === 1) fileList = [];
-            updateFn();
+            if (props.limit === 1) fileList.value = [];
         }
     }
 }
@@ -165,22 +162,18 @@ function handleDownload(data) {
 function handleRemove(file) {
     $vm.$$confirm('此操作将删除该数据, 是否继续?')
         .then(() => {
-            upload.clearFiles();
+            unref(upload).clearFiles();
             if (props.limit === 1) {
-                fileList = [];
+                fileList.value = [];
             } else {
-                const index = fileList.findIndex((item) => item.id === file.id);
-                fileList.splice(index, 1);
+                const index = fileList.value.findIndex((item) => item.id === file.id);
+                fileList.value.splice(index, 1);
             }
-            updateFn();
             $vm.msgSuccess('删除成功');
         })
         .catch(() => {
             $vm.msgInfo('已取消删除！');
         });
-}
-function updateFn() {
-    emits('update:modelValue', fileList);
 }
 </script>
 

@@ -1,7 +1,7 @@
-import myEditor from './my-editor.vue';
+import MyEditor from './my-editor.vue';
 
-myEditor.install = function (Vue) {
-    Vue.component(myEditor.name, myEditor);
+MyEditor.install = function (Vue) {
+    Vue.component('MyEditor', MyEditor);
 };
 
-export default myEditor;
+export default MyEditor;

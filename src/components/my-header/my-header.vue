@@ -1,9 +1,7 @@
 <template>
     <div class="my-header" :class="classes">
         <div class="my-header__content">
-            <el-icon v-if="icon" class="my-header__icon">
-                <component :is="icon" />
-            </el-icon>
+            <my-icon v-if="icon" :icon="icon" :ElIcon="ElIcon" class="my-header__icon" />
             <slot name="title">{{ title }}</slot>
         </div>
         <div v-if="$slots.handle" class="my-header__handle">
@@ -21,24 +19,30 @@
 /**
  * 插槽
  * @member slots
- * @property {string} [title] 定义标题内容
- * @property {string} [handle] 定义操作功能区内容
+ * @property {String} [title] 定义标题内容
+ * @property {String} [handle] 定义操作功能区内容
  */
 /**
  * 属性参数
  * @member props
- * @property {string} [title] 标题文本
- * @property {string} [icon] 标题文本左侧的图标
- * @property {boolean} [background] 是否显示背景
- * @property {string} [size] 显示尺寸，可选值：'', 'large', 'medium', 'small'
- * @property {string} [theme=default] 风格主题，可选值：'default','border-left','border-top','border-bottom','bg-icon','bg-down','bg-right'
+ * @property {String} [title] 标题文本
+ * @property {String} [icon] 标题文本左侧的图标
+ * @property {Boolean} [ElIcon] 是否是 ElIcon 组件图标，默认为 true
+ * @property {Boolean} [background] 是否显示背景
+ * @property {String} [size] 显示尺寸，可选值：'', 'large', 'medium', 'small'
+ * @property {String} [theme=default] 风格主题，可选值：'default','border-left','border-top','border-bottom','bg-icon','bg-down','bg-right'
  */
 const props = defineProps({
         // 标题文字
         title: String,
 
         // 文字旁边的Icon
-        icon: [String, Object, Function],
+        icon: [String],
+
+        ElIcon: {
+            type: Boolean,
+            default: true,
+        },
 
         // 是否是否显示背景
         background: Boolean,
@@ -176,7 +180,7 @@ $border-radius: 0.4rem;
     position: relative;
     height: $default;
     color: var(--el-color-black);
-    font-size: var(--el-font-size-base);
+    font-size: var(--el-font-size-medium);
     box-sizing: border-box;
 
     @include m(border-left) {
@@ -212,7 +216,7 @@ $border-radius: 0.4rem;
 
     @include m(bg-icon) {
         @include e(content) {
-            padding-left: 3rem;
+            padding-left: 3.5rem;
         }
         @include e(icon) {
             background: var(--el-color-primary);
@@ -222,7 +226,7 @@ $border-radius: 0.4rem;
             position: absolute;
             left: 0;
             line-height: calc($default - 0.5rem - $border-top-width);
-            margin-top: -1px;
+            box-sizing: content-box;
             padding: 0 0.5rem;
             border-radius: 0 0 1rem 1rem;
             margin-left: 0.5rem;
@@ -322,12 +326,12 @@ $border-radius: 0.4rem;
     }
 
     @include when(background) {
-        background: var(--el-fill-color-lighter, var(--el-border-color-lighter));
+        background: var(--el-bg-color-page, var(--el-border-color-lighter));
     }
 
     @include when(large) {
         height: $large;
-        font-size: var(--el-font-size-medium);
+        font-size: var(--el-font-size-large);
     }
 
     @include when(medium) {
@@ -353,6 +357,8 @@ $border-radius: 0.4rem;
     @include e(icon) {
         color: var(--el-color-primary);
         padding-right: 0.5rem;
+        font-size: 1.5em;
+        vertical-align: -24%;
     }
 
     @include e(handle) {

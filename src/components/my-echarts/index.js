@@ -1,6 +1,6 @@
-import myEcharts from './my-echarts.vue';
+import MyEcharts from './my-echarts.vue';
 
-myEcharts.install = function (Vue) {
-    Vue.component(myEcharts.name, myEcharts);
+MyEcharts.install = function (Vue) {
+    Vue.component('MyEcharts', MyEcharts);
 };
-export default myEcharts;
+export default MyEcharts;

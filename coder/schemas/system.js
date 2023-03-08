@@ -16,7 +16,7 @@ module.exports = {
         {
             title: '部门管理',
             name: 'dept',
-            methods: ['add', 'edit', 'remove', 'page', 'info'],
+            methods: ['add', 'edit', 'remove', 'list', 'info'],
             path: '/system/dept',
         },
         {

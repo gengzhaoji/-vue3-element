@@ -12,9 +12,8 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
 import VueSetupExtend from 'vite-plugin-vue-setup-extend';
 // 自动导入composition api
 import AutoImport from 'unplugin-auto-import/vite';
-// vite首次打开界面加载慢问题/解决
-import OptimizationPersist from 'vite-plugin-optimize-persist';
-import PkgConfig from 'vite-plugin-package-config';
+// 将css转换成兼容多种浏览器的样式
+const postcssPresetEnv = require('postcss-preset-env');
 
 // https://vitejs.dev/config/
 export default ({ command, mode }) => {
@@ -24,22 +23,18 @@ export default ({ command, mode }) => {
     const isEnvProduction = mode === 'production';
     // vite插件
     const plugins = [
-        vue({
-            script: {
-                refSugar: true,
-            },
-        }),
+        vue({ reactivityTransform: true }),
         VueSetupExtend(),
         /**
-         *  注入环境变量到html模板中
-         *  如在  .env文件中有环境变量  VITE_APP_TITLE=admin
-         *  则在 html模板中  可以这样获取  <%- VITE_APP_TITLE %>
+         *  注入变量到html模板中
+         *  则在 html模板中可以这样获取  <%- TITLE %> <%- injectConfigScript %>
          *  文档：  https://github.com/anncwb/vite-plugin-html
          */
         createHtmlPlugin({
             inject: {
                 data: {
                     TITLE: 'MY-UI',
+                    // 全局动态打包调整数据文件
                     injectConfigScript: `<script src="/config.js?v=${new Date().getTime()}"></script>`,
                     ...env,
                 },
@@ -58,8 +53,6 @@ export default ({ command, mode }) => {
             imports: ['vue', 'vue-router'], // 自动导入vue和vue-router相关函数
             dts: 'src/auto-import.d.js', // 生成 `auto-import.d.js` 全局声明
         }),
-        PkgConfig(),
-        OptimizationPersist(),
     ];
     if (isEnvProduction) {
         plugins.push(
@@ -77,9 +70,9 @@ export default ({ command, mode }) => {
                     charset: false,
                 },
             },
-            // 消除vite2打包出现警告，"@charset" must be the first，
             postcss: {
                 plugins: [
+                    postcssPresetEnv(),
                     {
                         postcssPlugin: 'internal:charset-removal',
                         AtRule: {
@@ -110,6 +103,7 @@ export default ({ command, mode }) => {
         // alias 现在会被传递给 @rollup/plugin-alias 并不再需要开始/结尾处的斜线了。
         // 此行为目前是一个直接替换，所以 1.0 风格的目录别名需要删除其结尾处的斜线：
         resolve: {
+            extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
             alias: {
                 // 如果报错__dirname找不到，需要安装node,执行yarn add @types/node --save-dev
                 '@': resolve(__dirname, 'src'),

@@ -24,7 +24,7 @@
             <div class="p-10" v-hasPermi="['system:post:add', 'system:post:remove', 'system:post:export']">
                 <my-button type="primary" icon="Plus" @click.prevent="Add" v-hasPermi="['system:post:add']"> 新 增 </my-button>
                 <el-button-group> <my-button-export :load="Export" v-hasPermi="['system:post:export']" /> </el-button-group>
-                <my-button type="danger" v-show="tableSelection.length" @click.prevent="Delete" icon="Delete" v-hasPermi="['system:post:remove']"> 删 除 </my-button>
+                <my-button type="danger" :disabled="!tableSelection.length" @click.prevent="Delete" icon="Delete" v-hasPermi="['system:post:remove']"> 删 除 </my-button>
             </div>
             <my-list-panel ref="table" :loadFn="loadData" :total="state.total">
                 <my-table :data="state.list" :columns="state.columns" @selection-change="(val) => (tableSelection = val)">
@@ -39,7 +39,7 @@
         </div>
 
         <!-- 添加或修改岗位对话框 -->
-        <el-dialog :title="dialog.title" v-model="dialog.open" width="500px" append-to-body @close="resetForm(dialogForm)">
+        <el-dialog :title="dialog.title" v-model="dialog.open" width="500px" append-to-body @closed="resetForm(dialogForm)">
             <el-form ref="dialogForm" :model="dialog.form" :rules="rules" label-width="100px" class="validate--bottom">
                 <el-form-item label="岗位名称" prop="postName">
                     <my-input v-model="dialog.form.postName" placeholder="请输入岗位名称" />
@@ -62,10 +62,8 @@
                 </el-form-item>
             </el-form>
             <template #footer>
-                <div class="dialog-footer">
-                    <my-button type="primary" @click.prevent="submitForm()"> 确 定 </my-button>
-                    <my-button @click.prevent="dialog.open = false">取 消</my-button>
-                </div>
+                <my-button @click.prevent="dialog.open = false">取 消</my-button>
+                <my-button type="primary" @click.prevent="submitForm()">确 定</my-button>
             </template>
         </el-dialog>
     </div>
@@ -135,7 +133,7 @@ let queryParams = $ref({
             postName: '',
             postCode: '',
             postSort: 0,
-            status: '',
+            status: 0,
             remark: '',
         },
     });
@@ -208,11 +206,7 @@ function Delete() {
         .then(() => {
             removePost({ ids: tableSelection.map((item) => item.id).join() }).then(() => {
                 if (tableSelection.length === state.list.length) {
-                    if (table.lastcurrentPage) {
-                        table.reload();
-                    } else {
-                        table.loadData();
-                    }
+                    table?.prevFn?.();
                 } else {
                     table.loadData();
                 }

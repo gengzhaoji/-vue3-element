@@ -9,19 +9,19 @@
 <script setup name="MyTimer">
 /**
  * 计时器组件
- * @module $ui/components/my-timer
+ * @module components/my-timer
  */
 
 import Dayjs from 'dayjs';
 /**
  * 属性参数
  * @member props
- * @property {string|number} [target] 设定值，String为时间格式，Number是秒数，  countdown为true， 是开始值， countdown为false时结束值
- * @property {string} [format=HH:mm:ss] 显示格式
- * @property {boolean} [countdown=false] 倒数模式
- * @property {string} [type] 颜色,可选值 'primary', 'success', 'warning', 'danger', 'info'
- * @property {boolean} [auto=false] 自动运行
- * @property {boolean} [interval=1000] 执行时间隔 单位 ms
+ * @property {String|Number} [target] 设定值，String为时间格式，Number是秒数，  countdown为true， 是开始值， countdown为false时结束值
+ * @property {String} [format=HH:mm:ss] 显示格式
+ * @property {Boolean} [countdown=false] 倒数模式
+ * @property {String} [type] 颜色,可选值 'primary', 'success', 'warning', 'danger', 'info'
+ * @property {Boolean} [auto=false] 自动运行
+ * @property {Number} [interval=1000] 执行时间隔 单位 ms
  */
 const props = defineProps({
         // 设定值，String为时间格式，Number是秒数，  countdown为true， 是开始值， countdown为false时结束值
@@ -48,9 +48,10 @@ const props = defineProps({
             default: 1000,
         },
     }),
-    $emit = defineEmits(['start', 'stop', 'reset', 'finish', 'tick']);
+    $emits = defineEmits(['start', 'stop', 'reset', 'finish', 'tick']);
+
 // 属性、方法抛出
-defineExpose({ start });
+defineExpose({ start, stop, reset });
 
 watch(
     () => props.target,
@@ -60,17 +61,17 @@ watch(
 );
 
 let timerId = null,
-    dayjs = $ref(null),
-    targetDayjs = $ref(null),
-    minDayjs = $ref(null),
-    isFinish = $ref(false);
+    dayjs = ref(null),
+    targetDayjs = null,
+    minDayjs = null,
+    isFinish = ref(false);
 
 const classes = computed(() => ({
         'my-timer': true,
         [`is-${props.type}`]: !!props.type,
-        'is-finish': isFinish,
+        'is-finish': isFinish.value,
     })),
-    displayValue = computed(() => (dayjs ? dayjs.format(props.format) : ''));
+    displayValue = computed(() => (dayjs.value ? dayjs.value.format(props.format) : ''));
 
 function init() {
     reset();
@@ -94,7 +95,7 @@ function getMax() {
  * @method start
  */
 function start() {
-    if (!dayjs) return;
+    if (!dayjs.value) return;
     clearInterval(timerId);
     timerId = setInterval(() => {
         tick();
@@ -104,7 +105,7 @@ function start() {
      * @event start
      * @param {Dayjs} dayjs 时间对象
      */
-    $emit('start', dayjs);
+    $emits('start', dayjs.value);
 }
 /**
  * 停止运行
@@ -117,49 +118,49 @@ function stop() {
      * @event stop
      * @param {Dayjs} dayjs 时间对象
      */
-    $emit('stop', dayjs);
+    $emits('stop', dayjs.value);
 }
 /**
  * 重置
  * @method reset
  */
 function reset() {
-    isFinish = false;
+    isFinish.value = false;
     clearInterval(timerId);
     minDayjs = Object.freeze(getMin());
     targetDayjs = Object.freeze(getTarget());
-    dayjs = props.countdown ? Object.freeze(getTarget()) : Object.freeze(getMin());
+    dayjs.value = props.countdown ? Object.freeze(getTarget()) : Object.freeze(getMin());
     /**
      * 重置时触发
      * @event reset
      * @param {Dayjs} dayjs 时间对象
      */
-    $emit('reset', dayjs);
+    $emits('reset', dayjs.value);
 }
 function tick() {
-    if (!dayjs) return;
+    if (!dayjs.value) return;
     if (props.countdown) {
-        dayjs = Object.freeze(dayjs.subtract(props.interval, 'millisecond'));
-        if (dayjs.valueOf() === minDayjs.valueOf()) isFinish = true;
+        dayjs.value = Object.freeze(dayjs.value.subtract(props.interval, 'millisecond'));
+        if (dayjs.value.valueOf() === minDayjs.valueOf()) isFinish.value = true;
     } else {
-        dayjs = Object.freeze(dayjs.add(props.interval, 'millisecond'));
-        if (dayjs.valueOf() === targetDayjs.valueOf()) isFinish = true;
+        dayjs.value = Object.freeze(dayjs.value.add(props.interval, 'millisecond'));
+        if (dayjs.value.valueOf() === targetDayjs.valueOf()) isFinish.value = true;
     }
-    if (isFinish) {
+    if (isFinish.value) {
         clearInterval(timerId);
         /**
          * 完成时触发
          * @event finish
          * @param {Dayjs} dayjs 时间对象
          */
-        $emit('finish', dayjs);
+        $emits('finish', dayjs.value);
     } else {
         /**
          * 时间跳动时触发
          * @event tick
          * @param {Dayjs} dayjs 时间对象
          */
-        $emit('tick', dayjs);
+        $emits('tick', dayjs.value);
     }
 }
 onMounted(() => {

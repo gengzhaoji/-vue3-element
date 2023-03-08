@@ -44,7 +44,7 @@
  * @property {string} [title] 标题文本，如果需要设置复制的标题，可以使用title插槽
  * @property {string} [icon] 标题左侧的图标
  * @property {string} [theme] 风格设置，可选值：['', 'background', 'flag', 'border-left', 'border-top', 'border-bottom', 'bg-icon', 'bg-down', 'bg-right']
- * @property {boolean} [fit=false] 设置自适应父节点的高度
+ * @property {boolean} [fit] 设置自适应父节点的高度
  * @property {string} [size] 设置尺寸，可选值：'', 'large', 'medium', 'small'
  * @property {boolean} [border=true] 设置是否显示边框
  * @property {Object} [bodyStyle] 主体内容设置样式
@@ -93,6 +93,7 @@ const titleBackground = computed(() => props.theme === 'background'),
     titleTheme = computed(() => {
         if (props.theme === 'flag') return 'bg-down';
         if (props.theme === 'border-left') return 'border-left';
+        if (props.theme === 'background') return 'default';
         return props.theme;
     }),
     classes = computed(() => ({

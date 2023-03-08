@@ -27,7 +27,9 @@
         </template>
         <el-empty v-else :image-size="160" description="暂无数据"></el-empty>
         <div class="footer flex-center" v-if="data.length > 0">
-            <div class="flex-center" @click="$router.push('/system/message')"><span>查看全部</span> <i class="icon-jump"></i></div>
+            <div class="flex-center" @click="$router.push('/system/message')">
+                <span>查看全部</span> <el-icon><DArrowRight /></el-icon>
+            </div>
         </div>
     </div>
 </template>

@@ -29,7 +29,7 @@
         <div class="f1 h0 flex-col system-page-background m-t-10 b-r-4">
             <div class="p-10" v-hasPermi="['system:operlog:remove', 'system:operlog:export']">
                 <my-button-export :load="Export" v-hasPermi="['system:operlog:export']" />
-                <my-button type="danger" v-show="tableSelection.length" @click.prevent="Delete" icon="Delete" v-hasPermi="['system:operlog:remove']"> 删 除 </my-button>
+                <my-button type="danger" :disabled="!tableSelection.length" @click.prevent="Delete" icon="Delete" v-hasPermi="['system:operlog:remove']"> 删 除 </my-button>
             </div>
             <my-list-panel ref="table" :loadFn="loadData" :total="state.total">
                 <template #default="{ page, size }">
@@ -97,9 +97,7 @@
                 </el-row>
             </el-form>
             <template #footer>
-                <div class="dialog-footer">
-                    <my-button @click.prevent="open = false">关 闭</my-button>
-                </div>
+                <my-button @click.prevent="open = false">关 闭</my-button>
             </template>
         </el-dialog>
     </div>
@@ -192,11 +190,7 @@ function Delete() {
         .then(() => {
             removeOperlog({ ids: tableSelection.map((item) => item.id).join(',') }).then(() => {
                 if (tableSelection.length === state.list.length) {
-                    if (table.lastcurrentPage) {
-                        table.reload();
-                    } else {
-                        table.loadData();
-                    }
+                    table?.prevFn?.();
                 } else {
                     table.loadData();
                 }

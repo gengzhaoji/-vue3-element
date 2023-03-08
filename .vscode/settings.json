@@ -15,11 +15,11 @@
     "editor.tabSize": 2,
 
     /*  prettier的配置 */
-    "prettier.tabWidth": 4, //制表符符号eslint
+    "prettier.tabWidth": 4, // 制表符符号eslint
     "prettier.printWidth": 180, // 150 列后换行
-    "prettier.semi": true, //去掉代码结尾的分号
-    "prettier.singleQuote": true, //使用单引号替代双引号
-    "prettier.jsxBracketSameLine": false, // 在jsx中把'>' 是否单独放一行
+    "prettier.semi": false, // 代码结尾的分号
+    "prettier.singleQuote": true, // 使用单引号替代双引号
+    "prettier.bracketSameLine": false, // 在jsx中把'>' 是否单独放一行
 
     "javascript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": true,
     "javascript.format.insertSpaceBeforeFunctionParenthesis": true, //让函数(名)和后面的括号之间加个空格

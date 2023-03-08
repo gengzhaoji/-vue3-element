@@ -48,40 +48,40 @@ const props = defineProps({
         required: true,
     },
 });
-let // 文件类型
-    type = $ref(''),
-    dialogVisible = $ref(false),
-    fileRef = $ref(null);
+// 文件类型
+let type = ref(''),
+    dialogVisible = ref(false),
+    fileRef = ref(null);
 
 // excal文件预览
-let xlsxSheetsNames = $ref([]),
-    activeSheet = $ref(0),
-    xlsxSheetsHtml = $ref({});
+let xlsxSheetsNames = ref([]),
+    activeSheet = ref(0),
+    xlsxSheetsHtml = ref({});
 
 watch(
     () => props.url,
     (val) => {
         if (val) {
-            type = getFileType(val);
-            dialogVisible = true;
-            if (['word', 'excel'].includes(type)) {
+            type.value = getFileType(val);
+            dialogVisible.value = true;
+            if (['word', 'excel'].includes(type.value)) {
                 axios
                     .get(val, {
                         responseType: 'blob',
                     })
                     .then((res) => {
-                        if (['word'].includes(type)) {
-                            renderAsync(res.data, fileRef); // 渲染到页面
+                        if (['word'].includes(type.value)) {
+                            renderAsync(res.data, fileRef.value); // 渲染到页面
                         } else {
                             const fileReader = new FileReader();
                             fileReader.onload = (e) => {
                                 if (e.target?.result) {
                                     let workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' }); // 解析数据
-                                    activeSheet = 0;
-                                    xlsxSheetsNames = workbook.SheetNames; //该文件每个工作表名字
+                                    activeSheet.value = 0;
+                                    xlsxSheetsNames.value = workbook.SheetNames; //该文件每个工作表名字
                                     for (const key in workbook.Sheets) {
                                         if (Object.hasOwnProperty.call(workbook.Sheets, key)) {
-                                            xlsxSheetsHtml[key] = XLSX.utils.sheet_to_html(workbook.Sheets[key]);
+                                            unref(xlsxSheetsHtml)[key] = XLSX.utils.sheet_to_html(workbook.Sheets[key]);
                                         }
                                     }
                                 }

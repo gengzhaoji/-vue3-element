@@ -3,8 +3,7 @@ import { authLogin, authLogout, infoUserProfile } from '@a/public';
 import router from '@/router';
 import guarder from './guarder';
 
-export default defineStore({
-    id: 'user', // id必填，且需要唯一
+export default defineStore('user', {
     state: () => ({
         size: 'small',
         userInfo: {},
@@ -13,7 +12,7 @@ export default defineStore({
         menuTabsList: [],
         remark: '',
         token: '',
-        une: '',
+        uid: '',
         avatar: '',
         permissions: [],
         roles: [],
@@ -67,18 +66,20 @@ export default defineStore({
             return new Promise((resolve, reject) => {
                 infoUserProfile()
                     .then((res) => {
-                        const { user, roles: Roles, perms } = res?.data;
-                        if (Roles.length) {
-                            // 验证返回的roles是否是一个非空数组
-                            this.roles = Roles;
-                            // 按钮级权限数组
-                            this.permissions = perms;
-                        } else {
-                            this.roles = ['ROLE_DEFAULT'];
+                        if (res?.data) {
+                            const { user, roles: Roles, perms } = res?.data || {};
+                            if (Roles.length) {
+                                // 验证返回的roles是否是一个非空数组
+                                this.roles = Roles;
+                                // 按钮级权限数组
+                                this.permissions = perms;
+                            } else {
+                                this.roles = ['ROLE_DEFAULT'];
+                            }
+                            this.userInfo = { userId: user.id, userName: user.userName, nickName: user.nickName, deptId: user.deptId };
+                            this.avatar = user.avatar;
+                            this.remark = user.remark;
                         }
-                        this.userInfo = { userId: user.id, userName: user.userName, nickName: user.nickName, deptId: user.deptId };
-                        this.avatar = user.avatar;
-                        this.remark = user.remark;
                         resolve(res);
                     })
                     .catch((error) => {
@@ -102,10 +103,11 @@ export default defineStore({
         LogOutSET() {
             // 退出登录removeRoute删除动态添加的路由
             guarder().addRouter.forEach((item) => {
-                router.removeRoute(item.name);
+                router.removeRoute(item.name || item.path);
             });
             guarder().addRouter = [];
             this.token = '';
+            this.uid = '';
             this.roles = [];
             this.permissions = [];
             this.menuTabsList = [];

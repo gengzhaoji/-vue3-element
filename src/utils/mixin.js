@@ -1,7 +1,7 @@
 /**
  * 默认页面中的基本增删改查操作（弹窗类页面）
  */
-import { computed, inject, nextTick } from 'vue';
+import { computed, inject, nextTick, unref } from 'vue';
 
 // 响应数据转换（对象/函数）
 function typeFn(data) {
@@ -14,8 +14,8 @@ function typeFn(data) {
  * @param {Object} api 页面的增、删、改、查接口 默认对应 add、remove、edit、page
  * @param {String} id 表格数据的唯一标识，用于数据删除使用
  * @param {Object} dialog 页面数据新增时的弹窗数据，用于弹窗显示、隐藏和弹窗的title计算
- * @param {html} refTable 表格分页组件的dom数据，用户操作查询和重置分页查询等工能
- * @param {html} refDialogFrom 新增弹窗的form表单的dom数据，用户新增，修改等表单校验，因为响应式问题，所以需要传递function(){return}return该值
+ * @param {html} refTable 表格分页组件的dom数据，用户操作查询和重置分页查询等工能，因为响应式问题，所以需要传ref()属性值，不可以使用$();
+ * @param {html} refDialogFrom 新增弹窗的form表单的dom数据，用户新增，修改等表单校验，因为响应式问题，所以需要传ref()属性值，不可以使用$();
  * @returns
  */
 export default function ({
@@ -34,43 +34,46 @@ export default function ({
     refTable,
     refDialogFrom,
 } = {}) {
-    const $vm = inject('$vm');
-    let dialogTitle = computed(() => {
-        if (dialog.name === 'insert') return `新增${dialog.title}`;
-        if (dialog.name === 'update') return `修改${dialog.title}`;
-        if (dialog.name === 'detail') return `${dialog.title}详情`;
-    });
-    let orderKeys = computed(() => {
-        let data = [];
-        state.columns.forEach((item) => {
-            if (!!item.sortable) {
-                data.push(item.prop);
-            }
+    // 全局挂载的方法获取
+    const $vm = inject('$vm'),
+        // 弹窗Title计算逻辑
+        dialogTitle = computed(() => {
+            if (dialog.name === 'insert') return `新增${dialog.title}`;
+            if (dialog.name === 'update') return `修改${dialog.title}`;
+            if (dialog.name === 'detail') return `${dialog.title}详情`;
+        }),
+        // 表格排序字段统计函数
+        orderKeys = computed(() => {
+            let data = [];
+            state.columns.forEach((item) => {
+                if (!!item.sortable) {
+                    data.push(item.prop);
+                }
+            });
+            return data;
         });
-        return data;
-    });
     // 页面查询函数
     function getList() {
-        typeFn(refTable)?.loadData?.();
+        unref(refTable)?.loadData?.();
     }
     // 表格排序
     function sortChange({ column, prop, order }) {
         orderKeysFn();
-        typeFn(queryParams)[prop] = order === 'ascending'; // true为升序false为降序
-        typeFn(refTable)?.reload?.();
+        queryParams[prop] = order === 'ascending'; // true为升序false为降序
+        unref(refTable)?.reload?.();
     }
     // 重置表格排序条件
     function orderKeysFn() {
         for (const item of orderKeys) {
-            typeFn(queryParams)[item] = '';
+            queryParams[item] = '';
         }
     }
     // 初始化表格查询逻辑
     function loadData(pageNum, pageSize) {
-        let data = $vm.clone(typeFn(queryParams));
-        if (typeFn(queryFormItem)) {
+        let data = $vm.clone(queryParams);
+        if (queryFormItem) {
             // 时间组件
-            const dateList = $vm.clone(typeFn(queryFormItem)).filter((item) => item.itemType === 'date' && item.type.match(/range/gi));
+            const dateList = queryFormItem.filter((item) => item.itemType === 'date' && item.type.match(/range/gi));
             dateList.forEach((item) => {
                 const { prop, prepend } = item;
                 data = $vm.addDateRange(data, prop, prepend);
@@ -85,7 +88,7 @@ export default function ({
     }
     // 新增信息
     function insertFn() {
-        $vm.resetForm(typeFn(refDialogFrom));
+        $vm.resetForm(unref(refDialogFrom));
         dialog.name = 'insert';
         dialog.open = true;
         dialog.form.id = undefined;
@@ -93,15 +96,15 @@ export default function ({
     // 删除信息
     function deleteFn(data) {
         // 删除单条
-        const Table = typeFn(refTable);
+        const Table = unref(refTable);
         if (!Array.isArray(data)) {
             $vm.$$confirm('此操作将删除该条数据, 是否继续?')
                 .then(() => {
                     typeFn(api)
                         .remove({ ids: `${data[id]}` })
                         .then(() => {
-                            if (1 === state.list.length && Table?.lastcurrentPage) {
-                                Table?.reload?.();
+                            if (1 === state.list.length) {
+                                Table?.prevFn?.();
                             } else {
                                 getList();
                             }
@@ -118,8 +121,8 @@ export default function ({
                     typeFn(api)
                         .remove({ ids: data.map((item) => item[id]).join(',') })
                         .then(() => {
-                            if (data.length === state.list.length && Table.lastcurrentPage) {
-                                Table?.reload?.();
+                            if (data.length === state.list.length) {
+                                Table?.prevFn?.();
                             } else {
                                 getList();
                             }
@@ -160,7 +163,7 @@ export default function ({
     }
     // 弹窗提交函数
     function dialogSubmitFn() {
-        const DialogForm = typeFn(refDialogFrom),
+        const DialogForm = unref(refDialogFrom),
             Form = DialogForm?.$refs?.refMyForm || DialogForm;
         Form.validate((valid) => {
             if (valid) {
@@ -195,7 +198,7 @@ export default function ({
  * @param {Object} state 页面表格数据，
  * @param {Object} api 页面的增、删、改、查接口 默认对应 add、remove、edit、page
  * @param {String} id 表格数据的唯一标识，用于数据删除使用
- * @param {html} myTable 表格的dom数据，用户操作表格的选中事件
+ * @param {html} myTable 表格的dom数据，用户操作表格的选中事件，使用ref()传入
  * @returns
  */
 export function SpreadPage({
@@ -214,10 +217,10 @@ export function SpreadPage({
 
     // 初始化表格查询逻辑
     function loadData(pageNum, pageSize) {
-        let data = $vm.clone(typeFn(queryParams));
+        let data = $vm.clone(queryParams);
         if (queryFormItem) {
             // 时间组件
-            const dateList = $vm.clone(queryFormItem).filter((item) => item.itemType === 'date' && item.type.match(/range/gi));
+            const dateList = queryFormItem.filter((item) => item.itemType === 'date' && item.type.match(/range/gi));
             dateList.forEach((item) => {
                 const { prop, prepend } = item;
                 data = $vm.addDateRange(data, prop, prepend);
@@ -232,7 +235,7 @@ export function SpreadPage({
                 nextTick(() => {
                     const Ids = state.tableSelection.map((item) => item[id]);
                     state.list.forEach((row, i) => {
-                        if (Ids.includes(row[id])) typeFn(myTable)?.$refs?.myTable?.toggleRowSelection(state.list[i], true);
+                        if (Ids.includes(row[id])) unref(myTable)?.$refs?.myTable?.toggleRowSelection(state.list[i], true);
                     });
                 });
             });

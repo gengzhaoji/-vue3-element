@@ -1,6 +1,6 @@
-import myPager from './my-pager.vue';
+import MyPager from './my-pager.vue';
 
-myPager.install = function (Vue) {
-    Vue.component(myPager.name, myPager);
+MyPager.install = function (Vue) {
+    Vue.component('MyPager', MyPager);
 };
-export default myPager;
+export default MyPager;

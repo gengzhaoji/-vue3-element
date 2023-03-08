@@ -1,7 +1,7 @@
-import myNumber from './my-number.vue';
+import MyNumber from './my-number.vue';
 
-myNumber.install = function (Vue) {
-    Vue.component(myNumber.name, myNumber);
+MyNumber.install = function (Vue) {
+    Vue.component('MyNumber', MyNumber);
 };
 
-export default myNumber;
+export default MyNumber;

@@ -2,7 +2,7 @@
     <div class="echarts" ref="myEcharts" :style="styles"></div>
 </template>
 
-<script setup name="myEcharts">
+<script setup name="MyEcharts">
 import { useResizeObserver } from '@vueuse/core';
 
 /**
@@ -14,10 +14,10 @@ import { useResizeObserver } from '@vueuse/core';
 import * as echarts from 'echarts/core';
 
 /** 引入柱状图and折线图图表，图表后缀都为 Chart  */
-import { MapChart, ScatterChart, EffectScatterChart, HeatmapChart } from 'echarts/charts';
+import { MapChart, ScatterChart, EffectScatterChart, HeatmapChart, BarChart, LineChart } from 'echarts/charts';
 
 // 引入提示框，标题，直角坐标系，数据集，内置数据转换器组件，组件后缀都为 Component
-import { VisualMapComponent, GeoComponent, TitleComponent, TooltipComponent, GridComponent, DatasetComponent, TransformComponent } from 'echarts/components';
+import { VisualMapComponent, GeoComponent, TitleComponent, TooltipComponent, GridComponent, DatasetComponent, TransformComponent, LegendComponent } from 'echarts/components';
 
 // 标签自动布局，全局过渡动画等特性
 import { LabelLayout, UniversalTransition } from 'echarts/features';
@@ -29,6 +29,8 @@ import EVENTS from './EVENTS';
 
 // 注册必须的组件
 echarts.use([
+    LineChart,
+    BarChart,
     HeatmapChart,
     MapChart,
     ScatterChart,
@@ -39,6 +41,7 @@ echarts.use([
     GridComponent,
     DatasetComponent,
     TransformComponent,
+    LegendComponent,
     LabelLayout,
     UniversalTransition,
     CanvasRenderer,
@@ -64,14 +67,14 @@ function createToggleFeature(isFullscreen, clickHandler) {
 const $emit = defineEmits(EVENTS);
 /**
  * 参数属性
- * @property {object} [geo] 需要注册的地图geoJson， 目录 /widgets/my-echarts/map 下包含全国各地的地图
- * @property {string} [map] 需要注册的地图名称， map 和 geo 需要同时设置
- * @property {object|function} [options] echarts 配置项
- * @property {string} [width=100%] 图表的宽度
- * @property {string} [height=100%] 图表的高度
- * @property {boolean} [loading] 是否显示loading效果
- * @property {string|number} [group] 分组标识
- * @property {boolean} [toggle=false] 是否开启全屏/取消全屏切换功能
+ * @property {Object} [geo] 需要注册的地图geoJson， 目录 /widgets/my-echarts/map 下包含全国各地的地图
+ * @property {String} [map] 需要注册的地图名称， map 和 geo 需要同时设置
+ * @property {Object|function} [options] echarts 配置项
+ * @property {String} [width=100%] 图表的宽度
+ * @property {String} [height=100%] 图表的高度
+ * @property {Boolean} [loading=true] 是否显示loading效果
+ * @property {String|Number} [group] 分组标识
+ * @property {Boolean} [toggle=false] 是否开启全屏/取消全屏切换功能
  */
 const props = defineProps({
     geo: {

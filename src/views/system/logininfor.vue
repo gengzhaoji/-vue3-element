@@ -29,7 +29,7 @@
         <div class="f1 h0 flex-col m-t-10 system-page-background b-r-4">
             <div class="p-10" v-hasPermi="['system:logininfor:remove', 'system:logininfor:export']">
                 <my-button-export :load="Export" v-hasPermi="['system:logininfor:export']" />
-                <my-button type="danger" v-show="tableSelection.length" @click.prevent="deleteFn(tableSelection)" icon="Delete" v-hasPermi="['system:logininfor:remove']">
+                <my-button type="danger" :disabled="!tableSelection.length" @click.prevent="deleteFn(tableSelection)" icon="Delete" v-hasPermi="['system:logininfor:remove']">
                     删 除
                 </my-button>
             </div>
@@ -117,12 +117,12 @@ let queryParams = $ref({
     }),
     tableSelection = $ref([]);
 
-const refTable = $ref(null);
+const refTable = ref(null);
 const { $vm, loadData, deleteFn } = mixin({
     queryParams,
     state,
     api: { page: pageLogininfor, remove: removeLogininfor },
-    refTable: () => refTable,
+    refTable,
 });
 // 初始化执行逻辑
 $vm.$store.dict.GETsysCommonStatus();

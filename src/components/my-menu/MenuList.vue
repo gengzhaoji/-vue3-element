@@ -2,7 +2,7 @@
     <template v-for="(item, index) of list" :key="index">
         <el-sub-menu :index="item.path" v-if="item.children">
             <template #title>
-                <i :class="[item.meta.icon]"></i>
+                <i :class="[item?.meta?.icon]"></i>
                 <span>{{ item.meta.title }}</span>
             </template>
             <menu-list :list="item.children"></menu-list>

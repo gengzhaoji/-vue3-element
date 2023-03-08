@@ -22,8 +22,8 @@
                 />
             </div>
         </div>
-        <div class="right system-page-background b-r-4">
-            <div class="p-10">
+        <div class="right">
+            <div class="p-10 m-b-10 system-page-background b-r-4">
                 <my-form
                     inline
                     query
@@ -50,46 +50,45 @@
                     @searchFn="refTable.reload()"
                     @resetFn="refTable.reload()"
                 />
-                <div class="m-t-10" v-hasPermi="['system:user:add', 'system:user:remove', 'system:user:export']">
-                    <my-button type="primary" @click="insertFn" icon="Plus" v-hasPermi="['system:user:add']">新 增</my-button>
-                    <el-button-group>
-                        <my-button-export :load="Export" v-hasPermi="['system:user:export']" />
-                    </el-button-group>
-                    <my-button type="danger" v-show="tableSelection.length" @click="deleteFn(tableSelection)" icon="Delete" v-hasPermi="['system:user:remove']"> 删 除 </my-button>
-                </div>
             </div>
-
-            <my-list-panel ref="refTable" :loadFn="loadData" :total="state.total">
-                <template #default="{ page, size }">
-                    <my-table :data="state.list" :columns="state.columns" :initColumns="state.columns" @selection-change="(val) => (tableSelection = val)">
-                        <template #index="{ $index }">
-                            {{ $index + 1 + (page - 1) * size }}
-                        </template>
-                        <template #sex="{ row }">
-                            {{ selectDictLabel($store.dict.sysUserSex, row.sex) }}
-                        </template>
-                        <template #status="{ row }">
-                            <el-switch
-                                v-model="row.status"
-                                inline-prompt
-                                :active-value="0"
-                                :inactive-value="1"
-                                active-text="启"
-                                inactive-text="停"
-                                @change="handleStatusChange(row)"
-                            />
-                        </template>
-                        <template #default="{ row }">
-                            <my-button-text @click="handleUpdate(row)" v-hasPermi="['system:user:edit']"> 修改 </my-button-text>
-                            <my-button-text @click="handleResetPwd(row)" v-hasPermi="['system:user:resetPwd']"> 重置 </my-button-text>
-                            <my-button-text @click="deleteFn(row)" v-hasPermi="['secrecy:user:remove']">删除</my-button-text>
-                        </template>
-                    </my-table>
-                </template>
-            </my-list-panel>
+            <div class="system-page-background b-r-4 flex-col f1 h0">
+                <div class="p-10" v-hasPermi="['system:user:add', 'system:user:remove', 'system:user:export']">
+                    <my-button type="primary" @click="insertFn" icon="Plus" v-hasPermi="['system:user:add']">新 增</my-button>
+                    <my-button-export :load="Export" v-hasPermi="['system:user:export']" />
+                    <my-button type="danger" :disabled="!tableSelection.length" @click="deleteFn(tableSelection)" icon="Delete" v-hasPermi="['system:user:remove']"> 删 除 </my-button>
+                </div>
+                <my-list-panel ref="refTable" :loadFn="loadData" :total="state.total">
+                    <template #default="{ page, size }">
+                        <my-table :data="state.list" :columns="state.columns" :initColumns="state.columns" @selection-change="(val) => (tableSelection = val)">
+                            <template #index="{ $index }">
+                                {{ $index + 1 + (page - 1) * size }}
+                            </template>
+                            <template #sex="{ row }">
+                                {{ selectDictLabel($store.dict.sysUserSex, row.sex) }}
+                            </template>
+                            <template #status="{ row }">
+                                <el-switch
+                                    v-model="row.status"
+                                    inline-prompt
+                                    :active-value="0"
+                                    :inactive-value="1"
+                                    active-text="启"
+                                    inactive-text="停"
+                                    @change="handleStatusChange(row)"
+                                />
+                            </template>
+                            <template #default="{ row }">
+                                <my-button-text @click="handleUpdate(row)" v-hasPermi="['system:user:edit']"> 修改 </my-button-text>
+                                <my-button-text @click="handleResetPwd(row)" v-hasPermi="['system:user:resetPwd']"> 重置 </my-button-text>
+                                <my-button-text @click="deleteFn(row)" v-hasPermi="['secrecy:user:remove']">删除</my-button-text>
+                            </template>
+                        </my-table>
+                    </template>
+                </my-list-panel>
+            </div>
         </div>
         <!-- 添加或修改参数配置对话框 -->
-        <el-dialog :title="dialog.title" v-model="dialog.open" width="600px" append-to-body @close="resetForm(refDialogFrom)">
+        <el-dialog :title="dialog.title" v-model="dialog.open" width="600px" append-to-body @closed="resetForm(refDialogFrom)">
             <my-form
                 ref="refDialogFrom"
                 :model="dialogForm"
@@ -142,10 +141,8 @@
                 </template>
             </my-form>
             <template #footer>
-                <div class="dialog-footer">
-                    <my-button type="primary" @click.prevent="submitForm"> 确 定 </my-button>
-                    <my-button @click.prevent="dialog.open = false">取 消</my-button>
-                </div>
+                <my-button @click.prevent="dialog.open = false">取 消</my-button>
+                <my-button type="primary" @click.prevent="submitForm()">确 定</my-button>
             </template>
         </el-dialog>
     </div>

@@ -35,7 +35,7 @@
         }
     }
     .el-menu-item.is-active {
-        background-color: var(--el-menu-hover-bg-color);
+        background-color: var(--el-menu-active-bg-color, var(--el-menu-hover-bg-color)) !important;
     }
 }
 .el-menu--horizontal {
@@ -97,7 +97,6 @@
 
 // bialog
 .el-dialog {
-    --el-dialog-padding-primary: 10px !important;
     --el-dialog-padding-primary: 15px !important;
     border-radius: var(--el-border-radius-base) !important;
     .el-dialog__header {
@@ -111,6 +110,9 @@
         width: 50px;
         height: 50px;
         font-size: var(--el-message-close-size, 20px);
+    }
+    .el-dialog__footer {
+        padding-top: 0px;
     }
 }
 
@@ -179,7 +181,7 @@
 
 // 表格
 .el-table {
-    --el-table-header-bg-color: var(--el-fill-color-lighter, var(--el-border-color-lighter)) !important;
+    --el-table-header-bg-color: var(--el-fill-color-light, var(--el-border-color-lighter)) !important;
     &__body,
     &__footer,
     &__empty-block,

@@ -11,14 +11,18 @@
 </template>
 
 <script setup name="App">
+import User from '@s/user';
 import { ElConfigProvider } from 'element-plus';
 import zhCn from 'element-plus/lib/locale/lang/zh-cn';
 import { debounce } from '@u/util';
 import { whiteList } from '@/helper/guarder';
 // 窗口大小
 import { useWindowSize } from '@vueuse/core';
-const { width } = useWindowSize();
-watch(width, (val) => ($store.user.size = val > 1024 ? 'default' : 'small'));
+
+const { width } = useWindowSize(),
+    $route = useRoute();
+
+watch(width, (val) => (User().size = val > 1024 ? 'default' : 'small'), { immediate: true });
 
 /**
  * 全局挂载方法的注入和使用
@@ -27,7 +31,7 @@ let {
     appContext: {
         app: {
             config: {
-                globalProperties: { $$confirm, $confirm, $router, $store, addDateRange, clone, cloneDeep, getImgUrl, msgError, msgInfo, msgSuccess, resetForm, selectDictLabel },
+                globalProperties: { $$confirm, $confirm, $router, $store, addDateRange, clone, cloneDeep, msgError, msgInfo, msgSuccess, resetForm, selectDictLabel },
             },
         },
     },
@@ -41,7 +45,6 @@ provide('$vm', {
     addDateRange,
     clone,
     cloneDeep,
-    getImgUrl,
     msgError,
     msgInfo,
     msgSuccess,

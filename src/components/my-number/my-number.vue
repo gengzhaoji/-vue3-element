@@ -13,15 +13,13 @@
         </span>
         <span v-if="trend || $slots.trend" class="my-number__trend" :class="trendClasses">
             <slot name="trend" :trend="trend">
-                <el-cion>
-                    <component :is="trendIcon" />
-                </el-cion>
+                <component :is="trendIcon" />
             </slot>
         </span>
     </div>
 </template>
 
-<script setup name="myNumber">
+<script setup name="MyNumber">
 /**
  * 数字组件
  * @module components/my-number
@@ -40,21 +38,21 @@ const $emit = defineEmits(['complete']);
 /**
  * 属性参数
  * @member props
- * @property {number} [value] 原始值
- * @property {number} [defaultValue=0] 默认值，即value无效时取defaultValue, 如果 defaultValue为null，显示空白
- * @property {boolean|Object} [countUp] CountUp配置参数对象
- * @property {boolean} [countUp.auto=true] 是否自动开始计数，默认为自动开始
- * @property {number} [countUp.startVal=0] 计数初始值，不限正负数，默认值为0
- * @property {number} [countUp.duration=2] 计数器动画持续时间，即计数器从开始到结束的时间，单位为秒，默认值为2秒
- * @property {boolean} [countUp.useEasing=true] 是否显示渐入渐出效果。默认值为显示
- * @property {string} [trend] 趋势, 可选值：'up', 'down', '-'
- * @property {number} [precision=0] 精度，保留几位小数
- * @property {string} [separator=,] 分隔值的符号，默认值为‘,’（英文逗号）
- * @property {string} [prefix] 前缀内容，也可以用插槽定义
- * @property {string} [suffix] 后缀内容，也可以用插槽定义
- * @property {boolean} [percentage] 按百分比计算显示, 如value=0.2, 显示为 20%
- * @property {string} [type] 颜色类型, 可选值： 'primary', 'success', 'warning', 'danger', 'info'
- * @property {boolean} [sup] 前缀 和 后缀采用下标显示
+ * @property {Number} [value] 原始值
+ * @property {Number} [defaultValue=0] 默认值，即value无效时取defaultValue, 如果 defaultValue为null，显示空白
+ * @property {Object} [countUp] CountUp配置参数对象
+ * @property {Boolean} [countUp.auto=true] 是否自动开始计数，默认为自动开始
+ * @property {Number} [countUp.startVal=0] 计数初始值，不限正负数，默认值为0
+ * @property {Number} [countUp.duration=2] 计数器动画持续时间，即计数器从开始到结束的时间，单位为秒，默认值为2秒
+ * @property {Boolean} [countUp.useEasing=true] 是否显示渐入渐出效果。默认值为显示
+ * @property {String} [trend] 趋势, 可选值：'up', 'down', '-'
+ * @property {Number} [precision=0] 精度，保留几位小数
+ * @property {String} [separator=,] 分隔值的符号，默认值为‘,’（英文逗号）
+ * @property {String} [prefix] 前缀内容，也可以用插槽定义
+ * @property {String} [suffix] 后缀内容，也可以用插槽定义
+ * @property {Boolean} [percentage] 按百分比计算显示, 如value=0.2, 显示为 20%
+ * @property {String} [type] 颜色类型, 可选值： 'primary', 'success', 'warning', 'danger', 'info'
+ * @property {Boolean} [sup] 前缀 和 后缀采用下标显示
  */
 const props = defineProps({
     // 数字
@@ -66,7 +64,7 @@ const props = defineProps({
     },
     // CountUp配置参数对象
     countUp: {
-        type: [Boolean, Object],
+        type: Object,
         default: () => {},
     },
     // 趋势
@@ -106,60 +104,60 @@ const props = defineProps({
     sup: Boolean,
 });
 
+// 计算属性
+const displayValue = computed(() => {
+        if (!isNumber(props.value)) return props.defaultValue ? getPercent(props.defaultValue) : '';
+        if (props.percentage) return getPercent(props.value);
+        return format(props.value, props.precision, props.separator);
+    }),
+    trendIcon = computed(() => {
+        if (!props.trend) return null;
+        const classes = {
+            up: 'Top',
+            down: 'Bottom',
+            '-': 'Minus',
+        };
+        return classes[props.trend];
+    }),
+    // 趋势样式
+    trendClasses = computed(() => {
+        if (!props.trend) return;
+        if (props.trend === '-') {
+            return 'is-default';
+        }
+        return `is-${props.trend}`;
+    }),
+    // 样式
+    classes = computed(() => ({
+        'my-number': true,
+        'is-pointer': useAttrs().click,
+        [`is-${props.type}`]: !!props.type,
+    })),
+    // 角标样式
+    supClass = computed(() => ({
+        'my-number__sup': !!props.sup,
+    })),
+    // countUp配置参数
+    countUpOptions = computed(() => ({
+        auto: true, // 是否自动开始计数，默认为自动开始
+        startVal: 0, // 计数初始值，不限正负数，默认值为0
+        decimalPlaces: 0, // 计数器数值精度。默认值为0
+        duration: 2, // 计数器动画持续时间，即计数器从开始到结束的时间，单位为秒，默认值为2秒
+        useEasing: true, // 是否显示渐入渐出效果。默认值为显示
+        useGrouping: true, // 计数器是否采用带格式的值，如10,000和10000两种格式（分隔符用separator来定义），默认值为使用
+        separator: ',', // 分隔值的符号，默认值为‘,’（英文逗号）
+        separator: props.separator,
+        decimalPlaces: props.precision,
+        ...props.countUp,
+    }));
+
+// 监听
 watch(
     () => props.value,
     (val) => {
         update(val);
     }
 );
-
-// 计算属性
-const displayValue = computed(() => {
-    if (!isNumber(props.value)) return props.defaultValue ? getPercent(props.defaultValue) : '';
-    if (props.percentage) return getPercent(props.value);
-    return format(props.value, props.precision, props.separator);
-});
-const trendIcon = computed(() => {
-    if (!props.trend) return null;
-    const classes = {
-        up: 'Top',
-        down: 'Bottom',
-        '-': 'Minus',
-    };
-    return classes[props.trend];
-});
-const trendClasses = computed(() => {
-    if (!props.trend) return;
-    if (props.trend === '-') {
-        return 'is-default';
-    }
-    return `is-${props.trend}`;
-});
-const classes = computed(() => {
-    return {
-        'my-number': true,
-        'is-pointer': useAttrs().click,
-        [`is-${props.type}`]: !!props.type,
-    };
-});
-const supClass = computed(() => {
-    return {
-        'my-number__sup': !!props.sup,
-    };
-});
-// countUp配置参数
-const countUpOptions = computed(() => ({
-    auto: true, // 是否自动开始计数，默认为自动开始
-    startVal: 0, // 计数初始值，不限正负数，默认值为0
-    decimalPlaces: 0, // 计数器数值精度。默认值为0
-    duration: 2, // 计数器动画持续时间，即计数器从开始到结束的时间，单位为秒，默认值为2秒
-    useEasing: true, // 是否显示渐入渐出效果。默认值为显示
-    useGrouping: true, // 计数器是否采用带格式的值，如10,000和10000两种格式（分隔符用separator来定义），默认值为使用
-    separator: ',', // 分隔值的符号，默认值为‘,’（英文逗号）
-    separator: props.separator,
-    decimalPlaces: props.precision,
-    ...props.countUp,
-}));
 watch(
     () => countUpOptions.value,
     (val) => {
@@ -167,6 +165,7 @@ watch(
         init();
     }
 );
+
 function isNumber(n) {
     const val = Number.parseFloat(n);
     return !Number.isNaN(val) && Number.isFinite(val);
@@ -193,13 +192,13 @@ function format(val, n, separator) {
 }
 
 let counter;
-const container = $ref(null);
+const container = ref(null);
 /**
  * 生成计数器
  */
 function setCountUp() {
     if (counter) counter = null;
-    counter = new CountUp(container, props.value, countUpOptions.value);
+    counter = new CountUp(unref(container), props.value, countUpOptions.value);
 }
 /**
  * 重新启动计数器
@@ -245,12 +244,10 @@ function onComplete() {
  */
 function init() {
     setCountUp();
-    if (countUpOptions.value.auto) {
-        start();
-    }
+    if (countUpOptions.value.auto) start();
 }
 onMounted(() => {
-    if (countUpOptions.value) init();
+    if (!props.percentage) init();
 });
 onBeforeUnmount(() => {
     counter = null;
@@ -259,12 +256,15 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .my-number {
-    display: inline-block;
+    display: inline-flex;
     > span {
-        vertical-align: baseline;
+        vertical-align: middle;
     }
     &__sup {
         font-size: 14px;
+    }
+    &__trend {
+        width: 1.5rem;
     }
 }
 .is-primary {
@@ -283,9 +283,12 @@ onBeforeUnmount(() => {
     color: var(--el-color-info);
 }
 .is-up {
-    color: #f56c6c;
+    color: #f5222d;
 }
 .is-down {
-    color: #e3f5da;
+    color: #52c41a;
+}
+.is-default {
+    color: var(--el-color-primary);
 }
 </style>

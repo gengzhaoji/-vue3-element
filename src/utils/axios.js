@@ -92,7 +92,7 @@ function isJSON(str) {
  * @return {string}
  */
 function createKey(config) {
-    const { url, method, params = '', data = '' } = config;
+    const { url, method, params = {}, data = {} } = config;
     return encodeURIComponent([url, method, isJSON(params) ? params : JSON.stringify(params), isJSON(data) ? data : JSON.stringify(data)].join(','));
 }
 
@@ -103,7 +103,7 @@ service.interceptors.request.use(
     (config) => {
         // 是否需要设置 token
         const isToken = (config.headers || {}).isToken === false,
-            { token, une } = user();
+            { token, uid } = user();
         if (token && !isToken) {
             config.headers['Authorization'] = 'Bearer ' + token; // 让每个请求携带自定义token
         }
@@ -111,13 +111,13 @@ service.interceptors.request.use(
         // 创建全局loading，排除不需要loading的接口
         if (axiosPromiseArr.size === 0 && !['/auth/login', '/auth/logout', '/captcha/image', '/system/user/profile/info', '/home/routers'].includes(config.url)) {
             loadingInstance = ElLoading.service({
-                text: '拼命加载中',
+                text: '加载中...',
                 target: '#ContentArea',
             });
         }
 
         // 联合登陆携带une
-        if (une) config.headers['une'] = une;
+        if (uid) config.headers['uid'] = une;
 
         /**
          * 请求未完成时保存取消的cancelToken
@@ -156,10 +156,10 @@ service.interceptors.response.use(
             });
         }
         // 未设置状态码则默认成功状态
-        const code = (res.data && res.data.code) || AJAX_SUCCESS;
+        const code = res.data?.code || AJAX_SUCCESS;
 
         // 获取错误信息
-        const msg = errorCode[code] || (res.data && res.data.msg) || errorCode['default'];
+        const msg = errorCode[code] || res.data?.msg || errorCode['default'];
 
         if ([401, 418].includes(code)) {
             cancelFn();
@@ -206,6 +206,7 @@ service.interceptors.response.use(
             });
             cancelFn();
         }
+        loadingInstance?.close();
         return Promise.reject(error);
     }
 );

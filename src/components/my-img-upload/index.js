@@ -1,6 +1,6 @@
-import myImgUpload from './my-img-upload.vue';
+import MyImgUpload from './my-img-upload.vue';
 
-myImgUpload.install = function (Vue) {
-    Vue.component(myImgUpload.name, myImgUpload);
+MyImgUpload.install = function (Vue) {
+    Vue.component('MyImgUpload', MyImgUpload);
 };
-export default myImgUpload;
+export default MyImgUpload;

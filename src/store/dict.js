@@ -14,8 +14,7 @@ dict.forEach(function (item) {
     };
 });
 
-export default defineStore({
-    id: 'dict',
+export default defineStore('dict', {
     state: () => state,
     actions: {
         // 多个字典key查询多个字典数据

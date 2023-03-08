@@ -17,5 +17,3 @@ module.exports = {
 }
 
 ```
-
-ajax 参数选项 [options](/static/utils/module-utils_axios.html)

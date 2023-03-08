@@ -1,20 +1,28 @@
 import { defineStore } from 'pinia';
 import { shallowRef } from 'vue';
-
+// 默认全局路由
 import { homeRouters } from '@/api/public';
+// 默认布局Layout、ParentView
 import Layout from '@/extension/layout/index.vue';
 import ParentView from '@/extension/ParentView/index.vue';
+// 相关数据处理逻辑
 import router from '@/router';
 import { ElMessageBox } from 'element-plus';
 import { clone } from '@u/convert';
 import { find } from '@u/tree';
 import user from './user';
 
-// 处理解决import动态加载组件 打包部署为空的问题
+/*
+ * 处理解决import动态加载组件 打包部署为空的问题
+ * **为通配符,vite不支持require导入方式,故用import.meta.glob(vite动态导入)
+ * import.meta.glob
+ * 该方法匹配到的文件默认是懒加载，通过动态导入实现，构建时会分离独立的 chunk，是异步导入，返回的是 Promise
+ * import.meta.globEager
+ * 该方法是直接导入所有模块，并且是同步导入，返回结果直接通过 for...in循环就可以操作
+ */
 const modules = import.meta.glob('../views/**/*.vue');
 
-export default defineStore({
-    id: 'guarder', // id必填，且需要唯一
+export default defineStore('guarder', {
     state: () => ({
         cachedComponents: [],
         Menus: [],
@@ -51,7 +59,11 @@ export default defineStore({
                             },
                         ];
                         this.addRouter.forEach((item) => {
-                            router.addRoute(item);
+                            if (item.parentName) {
+                                router.addRoute(item.parentName, item);
+                            } else {
+                                router.addRoute(item);
+                            }
                         });
                         this.RoutersList = [...new Set(router.getRoutes().map((item) => item.path))];
                         resolve();
@@ -105,27 +117,29 @@ function filterAsyncRouter(data) {
         // 无目录菜单
         if (parentId == '0' && menuType == 'C') {
             // 布局 layoutPath为默认布局，layoutPath == 'ParentView'全屏布局，modules[`../views/${layoutPath}.vue`]自定义页面布局
-            let layout = !layoutPath ? shallowRef(Layout) : layoutPath == 'ParentView' ? shallowRef(ParentView) : modules[`../views/${layoutPath}.vue`];
-            let Path = !/^(\/)/.test(path) ? `/${path}` : path;
+            const layout = !layoutPath ? shallowRef(Layout) : layoutPath == 'ParentView' ? shallowRef(ParentView) : modules[`../views/${layoutPath}.vue`];
+            const parentName = !layoutPath ? 'Layout' : layoutPath == 'ParentView' ? 'ParentView' : 'layoutPath}';
+            if (!router.hasRoute(parentName)) {
+                router.addRoute({
+                    name: parentName,
+                    path: parentName,
+                    component: layout,
+                });
+            }
+            const Path = !/^(\/)/.test(path) ? `/${path}` : path;
             RoutesData[id] = {
+                parentName,
+                parentId,
+                component,
+                hidden: visible == 1,
+                meta: { title: menuName, icon, keepAlive: isCache == 1 },
                 path: Path,
                 name: Path,
-                component: layout,
-                parentId: '0',
-                children: [
-                    {
-                        component: component,
-                        hidden: visible == 1,
-                        meta: { title: menuName, icon, keepAlive: isCache == 1 },
-                        name: '',
-                        path: '',
-                        orderNum,
-                        id,
-                    },
-                ],
+                orderNum,
+                id,
             };
         } else {
-            let Path = parentId == '0' ? (!/^(\/)/.test(path) ? `/${path}` : path) : path;
+            const Path = parentId == '0' ? (!/^(\/)/.test(path) ? `/${path}` : path) : path;
             RoutesData[id] = {
                 component: component,
                 hidden: visible == 1,
@@ -139,7 +153,7 @@ function filterAsyncRouter(data) {
         }
         // 左边菜单数据
         if (visible !== 1) {
-            let Path = parentId == '0' ? (!/^(\/)/.test(path) ? `/${path}` : path) : path;
+            const Path = parentId == '0' ? (!/^(\/)/.test(path) ? `/${path}` : path) : path;
             MenusData[id] = {
                 component: component,
                 hidden: visible == 1,

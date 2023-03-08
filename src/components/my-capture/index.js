@@ -1,7 +1,7 @@
-import myCapture from './my-capture.vue';
+import MyCapture from './my-capture.vue';
 
-myCapture.install = function (Vue) {
-    Vue.component(myCapture.name, myCapture);
+MyCapture.install = function (Vue) {
+    Vue.component('MyCapture', MyCapture);
 };
 
-export default myCapture;
+export default MyCapture;

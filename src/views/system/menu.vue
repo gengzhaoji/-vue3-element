@@ -24,10 +24,18 @@
                 :data="state.list"
                 :columns="state.columns"
                 lazy
-                :load="(tree, treeNode, resolve) => resolve(tree.children)"
                 row-key="id"
-                :expand-row-keys="expandRowkeys"
-                @expand-change="expandChangeFn"
+                :load="
+                    (tree, treeNode, resolve) => {
+                        loadFnResolve.add(tree.id)
+                        resolve(tree.children)
+                    }
+                "
+                @row-click="
+                    (row, column, event) => {
+                        event.currentTarget?.querySelector('.el-table__expand-icon')?.click()
+                    }
+                "
             >
                 <template #icon="{ row }">
                     <i :class="row.icon" />
@@ -75,15 +83,15 @@
                     <span v-else> </span>
                 </template>
                 <template #default="{ row }">
-                    <my-button type="text" class="caozuo" @click.prevent="Update(row)" v-hasPermi="['system:menu:edit']">修改</my-button>
-                    <my-button type="text" class="caozuo" @click.prevent="Add(row)" v-if="row.menuType !== 'F'" v-hasPermi="['system:menu:add']">新增</my-button>
-                    <my-button type="text" class="caozuo" @click.prevent="Delete(row)" v-if="!row.children.length" v-hasPermi="['system:menu:remove']">删除</my-button>
+                    <my-button-text @click.stop="Update(row)" v-hasPermi="['system:menu:edit']">修改</my-button-text>
+                    <my-button-text @click.stop="Add(row)" v-if="row.menuType !== 'F'" v-hasPermi="['system:menu:add']">新增</my-button-text>
+                    <my-button-text @click.stop="Delete(row)" v-if="!row.children.length" v-hasPermi="['system:menu:remove']">删除</my-button-text>
                 </template>
             </my-table>
         </div>
 
         <!-- 添加或修改菜单对话框 -->
-        <el-dialog :title="dialog.title" v-model="dialog.open" width="600px" append-to-body @close="resetForm(dialogForm)">
+        <el-dialog :title="dialog.title" v-model="dialog.open" width="600px" append-to-body @closed="resetForm(dialogForm)">
             <el-form ref="dialogForm" :model="dialog.form" :rules="rules" label-width="100px" class="validate--bottom">
                 <el-row>
                     <el-col :span="24">
@@ -229,23 +237,19 @@
                 </el-row>
             </el-form>
             <template #footer>
-                <div class="dialog-footer">
-                    <my-button type="primary" @click.prevent="submitForm">确 定</my-button>
-                    <my-button @click.prevent="dialog.open = false">取 消</my-button>
-                </div>
+                <my-button @click.prevent="dialog.open = false">取 消</my-button>
+                <my-button type="primary" @click.prevent="submitForm()">确 定</my-button>
             </template>
         </el-dialog>
     </div>
 </template>
 
 <script setup name="Menu">
-import { listMenu, infoMenu, removeMenu, addMenu, editMenu } from '@/api/system';
-import icons from '@/config/icons';
-const $vm = inject('$vm');
+import { listMenu, removeMenu, addMenu, editMenu } from '@/api/system'
+import { find } from '@u/tree'
+import icons from '@/config/icons'
+const $vm = inject('$vm')
 
-/**
- * 查询菜单列表
- */
 // 查询参数
 let queryParams = $ref({
         needCount: 0,
@@ -315,40 +319,38 @@ let queryParams = $ref({
                 width: 180,
             },
         ],
-    });
-
-// 树形表格展开问题
-let expandRowkeys = $ref([]);
-function expandChangeFn(row, expanded) {
-    if (expanded) {
-        expandRowkeys.push(row.id);
-    } else {
-        expandRowkeys.splice(expandRowkeys.indexOf(row.id), 1);
-    }
-}
-
+    }),
+    // 树形表格展开问题
+    loadFnResolve = new Set(),
+    refTable = $ref(null)
+/**
+ * 查询菜单列表
+ */
 function loadData() {
     listMenu(queryParams).then((res) => {
-        state.list = res.data;
-        $vm.$store.guarder.GenerateRoutes();
-    });
+        state.list = res.data
+        $vm.$store.guarder.GenerateRoutes()
+        for (let key of loadFnResolve.keys()) {
+            refTable.$refs.myTable.store.states.lazyTreeNodeMap.value[key] = find(res.data, true, (item) => item.id === key).children
+        }
+    })
 }
 /**
  * 启用、停用
  */
 function statusFn(row) {
     if (row.id) {
-        const text = row.status == 0 ? '启用' : '停用';
+        const text = row.status == 0 ? '启用' : '停用'
         $vm.$$confirm(`确认要—${text}（${row.menuName}）菜单吗?`)
             .then(() => editMenu(row))
             .then(() => {
-                $vm.msgSuccess(text + '成功');
-                loadData();
+                $vm.msgSuccess(text + '成功')
+                loadData()
             })
             .catch(function () {
-                row.status = row.status == 0 ? 1 : 0;
-                $vm.msgInfo('已取消！');
-            });
+                row.status = row.status == 0 ? 1 : 0
+                $vm.msgInfo('已取消！')
+            })
     }
 }
 /**
@@ -356,17 +358,17 @@ function statusFn(row) {
  */
 function visibleFn(row) {
     if (row.id) {
-        const text = row.visible == 0 ? '显示' : '隐藏';
+        const text = row.visible == 0 ? '显示' : '隐藏'
         $vm.$$confirm(`确认要—${text}（${row.menuName}）菜单吗?`)
             .then(() => editMenu(row))
             .then(() => {
-                $vm.msgSuccess(text + '成功');
-                loadData();
+                $vm.msgSuccess(text + '成功')
+                loadData()
             })
             .catch(function () {
-                row.visible = row.visible == 0 ? 1 : 0;
-                $vm.msgInfo('已取消！');
-            });
+                row.visible = row.visible == 0 ? 1 : 0
+                $vm.msgInfo('已取消！')
+            })
     }
 }
 /**
@@ -374,17 +376,17 @@ function visibleFn(row) {
  */
 function isCacheFn(row) {
     if (row.id) {
-        const text = row.isCache == 0 ? '不缓存' : '缓存';
+        const text = row.isCache == 0 ? '不缓存' : '缓存'
         $vm.$$confirm(`确认要—${text}（${row.menuName}）该菜单吗?`)
             .then(() => editMenu(row))
             .then(() => {
-                $vm.msgSuccess('修改成功');
-                loadData();
+                $vm.msgSuccess('修改成功')
+                loadData()
             })
             .catch(function () {
-                row.isCache = row.isCache == 0 ? 1 : 0;
-                $vm.msgInfo('已取消！');
-            });
+                row.isCache = row.isCache == 0 ? 1 : 0
+                $vm.msgInfo('已取消！')
+            })
     }
 }
 
@@ -415,67 +417,65 @@ let dialog = $ref({
         orderNum: [{ required: true, message: '菜单顺序不能为空', trigger: 'change' }],
         path: [{ required: true, message: '路由地址不能为空', trigger: 'change' }],
     },
-    menuOptions = $computed(() => (state.list.length ? [{ id: '0', menuName: '主类目', children: state.list }] : [{ id: '0', menuName: '主类目' }]));
+    menuOptions = $computed(() => (state.list?.length ? [{ id: '0', menuName: '主类目', children: state.list }] : [{ id: '0', menuName: '主类目' }]))
 
 watch(
     () => dialog.form.parentId,
     (val) => {
-        if (val == 0) dialog.form.parentId = '0';
+        if (val == 0) dialog.form.parentId = '0'
     }
-);
+)
 
 /** 新增按钮操作 */
 function Add(row) {
     if (row != null && row.id) {
-        dialog.form.parentId = row.id;
+        dialog.form.parentId = row.id
     } else {
-        dialog.form.parentId = '0';
+        dialog.form.parentId = '0'
     }
-    dialog.open = true;
-    dialog.form.id = undefined;
-    dialog.title = '添加菜单';
+    dialog.open = true
+    dialog.form.id = undefined
+    dialog.title = '添加菜单'
 }
 /** 修改按钮操作 */
 function Update(row) {
-    infoMenu({ id: row.id }).then((res) => {
-        dialog.open = true;
-        dialog.title = '修改菜单';
-        nextTick(() => {
-            dialog.form = res.data;
-        });
-    });
+    dialog.open = true
+    dialog.title = '修改菜单'
+    nextTick(() => {
+        dialog.form = $vm.clone(row)
+    })
 }
 /** 删除按钮操作 */
 function Delete(row) {
     $vm.$$confirm(`是否确认删除名称为${row.menuName}的数据项?`)
         .then(() => {
             removeMenu({ ids: row.id }).then(() => {
-                loadData();
-                $vm.msgSuccess('删除成功');
-            });
+                loadData()
+                $vm.msgSuccess('删除成功')
+            })
         })
         .catch((err) => {
-            $vm.msgInfo('取消删除');
-        });
+            $vm.msgInfo('取消删除')
+        })
 }
-const dialogForm = $ref(null);
+const dialogForm = $ref(null)
 /** 提交按钮 */
 function submitForm() {
     dialogForm.validate((valid) => {
         if (valid) {
-            if (dialog.form.icon == '') dialog.form.icon = '#';
-            (dialog.form.id != undefined ? editMenu : addMenu)(dialog.form).then((res) => {
-                $vm.msgSuccess(dialog.form.id != undefined ? '修改成功' : '新增成功');
-                dialog.open = false;
-                loadData();
-            });
+            if (dialog.form.icon == '') dialog.form.icon = '#'
+            ;(dialog.form.id != undefined ? editMenu : addMenu)(dialog.form).then((res) => {
+                $vm.msgSuccess(dialog.form.id != undefined ? '修改成功' : '新增成功')
+                dialog.open = false
+                loadData()
+            })
         }
-    });
+    })
 }
 
-$vm.$store.dict.GETsysShowHide();
-$vm.$store.dict.GETsysNormalDisable();
-loadData();
+$vm.$store.dict.GETsysShowHide()
+$vm.$store.dict.GETsysNormalDisable()
+loadData()
 </script>
 
 <style lang="scss" scoped>

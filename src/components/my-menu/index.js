@@ -1,6 +1,6 @@
-import myMenu from './my-menu.vue';
+import MyMenu from './my-menu.vue';
 
-myMenu.install = function (Vue) {
-    Vue.component(myMenu.name, myMenu);
+MyMenu.install = function (Vue) {
+    Vue.component('MyMenu', MyMenu);
 };
-export default myMenu;
+export default MyMenu;

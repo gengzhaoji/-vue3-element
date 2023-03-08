@@ -42,7 +42,7 @@
             </my-list-panel>
         </div>
         <!-- 添加或修改参数配置对话框 -->
-        <el-dialog :title="dialog.title" v-model="dialog.open" width="500px" append-to-body @close="resetForm(dialogForm)">
+        <el-dialog :title="dialog.title" v-model="dialog.open" width="500px" append-to-body @closed="resetForm(dialogForm)">
             <el-form ref="dialogForm" :model="dialog.form" :rules="rules" label-width="80px" :disabled="dialog.title === '字典数据详情'" class="validate--bottom">
                 <el-form-item label="字典类型">
                     <my-input v-model="dialog.form.dictType" disabled />
@@ -68,10 +68,8 @@
                 </el-form-item>
             </el-form>
             <template #footer>
-                <div class="dialog-footer">
-                    <my-button type="primary" @click.prevent="submitForm"> 确 定 </my-button>
-                    <my-button @click.prevent="dialog.open = false">取 消</my-button>
-                </div>
+                <my-button @click.prevent="dialog.open = false">取 消</my-button>
+                <my-button type="primary" @click.prevent="submitForm()">确 定</my-button>
             </template>
         </el-dialog>
     </div>
@@ -239,11 +237,7 @@ function Delete() {
         .then(() => {
             removeDatadict({ ids: tableSelection.map((item) => item.id).join() }).then(() => {
                 if (tableSelection.length === state.list.length) {
-                    if (refTable.lastcurrentPage) {
-                        refTable.reload();
-                    } else {
-                        refTable.loadData();
-                    }
+                    refTable?.prevFn?.();
                 } else {
                     refTable.loadData();
                 }

@@ -112,14 +112,7 @@ export function base64ToFile(data, fileName = 'file') {
     while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
     }
-    // return new Blob([u8arr], `${fileName}.${suffix}`, { type: mime })();
-    return (
-        new File(u8arr),
-        `${fileName}.${suffix}`,
-        {
-            type: mime,
-        }
-    );
+    return new File(u8arr, `${fileName}.${suffix}`, { type: mime });
 }
 
 /**

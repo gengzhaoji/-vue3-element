@@ -7,15 +7,15 @@
     </span>
 </template>
 
-<script setup name="myPrint">
+<script setup name="MyPrint">
 import { addClass, removeClass, hasClass, setStyle } from 'element-plus/lib/utils/dom/style';
 /**
  * MyPrint
- * @module widgets/XdhPrint
+ * @module components/MyPrint
  * @example
  *
  * // 使用说明
- *  <my-print print-range=".pring-range1">
+ *  <my-print print-range="'.pring-range1'">
  *  </my-print>
  *
  * // ----------或使用slot-------
@@ -53,7 +53,7 @@ const props = defineProps({
             type: String,
             default: 'my-print-page-container',
         },
-        parentDom: [HTMLElement, Function, String],
+        parentDom: [Function, String],
         rootStyle: {
             type: Object,
             default: () => {
@@ -76,6 +76,7 @@ const props = defineProps({
         disableDefaultStyle: Boolean,
         preview: Boolean,
     }),
+    // 处理打印时表格滚动显示的问题
     defaultStyles = [
         {
             selector: '.el-table',
@@ -84,14 +85,15 @@ const props = defineProps({
             },
         },
         {
-            selector: '.el-table__body-wrapper',
+            selector: '.el-table__inner-wrapper',
             style: {
                 height: 'auto',
             },
         },
     ];
-let handle = null;
-let $tDoms = $ref(null);
+let handle = null,
+    $tDoms = null;
+
 function handlePrint() {
     if (typeof props.beforePrint === 'function') {
         props.beforePrint().then(() => {
@@ -192,6 +194,7 @@ function closeAfterPrint() {
         }, 300);
     }
 }
+// 克隆Dom
 function cloneDom() {
     if (props.printRange) {
         // 将打印区域筛选出来用一个div包裹起来

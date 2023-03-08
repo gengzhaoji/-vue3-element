@@ -167,14 +167,14 @@ export const removeDept = (data) => axios({
 })
 
 /**
- * 获取部门管理分页列表
+ * 获取部门管理不分页列表
  * @param {object} [data] 发送键值对数据
  * @returns {promise}
  */
-export const pageDept = (data) => axios({
+export const listDept = (data) => axios({
 	method: 'get',
 	data: data,
-	url: API_HOST + '/system/dept/page'
+	url: API_HOST + '/system/dept/list'
 })
 
 /**

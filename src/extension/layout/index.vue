@@ -57,6 +57,7 @@
                         <div class="flex-center navbar-icon-action pointer" @click="$router.push('/msgcenter')">
                             <el-badge :max="99" :value="messageNum">
                                 <img src="@/assets/img/bell.png" :class="messageNum !== 0 ? 'animation' : ''" />
+                                <audio ref="audio" src="/hrxz.com-eru2ukd5ojl43222.mp3" />
                             </el-badge>
                         </div>
                         <div class="li navbar-icon-action">
@@ -116,15 +117,14 @@
 
 <script setup name="layout">
 import { find } from '@u/tree';
-import myMenu from '@c/my-menu';
 import Tabs from './Tabs.vue';
 import Screen from './Screen.vue';
 import Setting from './Setting.vue';
 import { TITLE } from '@/config';
 import { useWindowSize } from '@vueuse/core';
-const { width: screenWidth } = useWindowSize();
 
-const $vm = inject('$vm'),
+const { width: screenWidth } = useWindowSize(),
+    $vm = inject('$vm'),
     $route = useRoute(),
     { theme, userInfo } = $vm.$store.user;
 
@@ -147,11 +147,8 @@ watch(
 // 计算属性
 const width = computed(() => {
         let data = screenWidth.value * 0.15;
-        if (data < 200) {
-            data = 200;
-        } else if (data > 250) {
-            data = 250;
-        }
+        if (data < 200) return 200;
+        if (data > 300) return 300;
         return data;
     }),
     aside_width = computed(() => {
@@ -177,7 +174,7 @@ const width = computed(() => {
 
 // 选中的菜单
 watch(
-    useRoute(),
+    $route,
     (val) => {
         if (find($vm.$store.guarder.Menus, true, (item, i, data) => item.path === val.path) !== null) {
             $vm.$store.user.activeMenu = val.path;
@@ -231,7 +228,15 @@ function menuTopSelect(id) {
 }
 
 // 消息提醒
-let messageNum = $ref(0);
+let messageNum = $ref(0),
+    audio = shallowRef();
+watch(
+    () => messageNum,
+    (val, oldval) => {
+        if (val >= oldval) unref(audio)?.play;
+    },
+    { immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>
@@ -322,7 +327,7 @@ let messageNum = $ref(0);
     }
 
     :deep(.el-dropdown) {
-        color: var(--el-text-color-regular);
+        color: var(--el-menu-text-color);
     }
 
     :deep(.el-aside) {
@@ -339,6 +344,7 @@ let messageNum = $ref(0);
         & > .el-menu--vertical {
             flex: 1;
             height: 0;
+            overflow-y: auto;
         }
         .sidebar__trigger {
             position: relative;

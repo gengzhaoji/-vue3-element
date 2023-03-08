@@ -5,14 +5,13 @@ $element-separator: '__';
 $modifier-separator: '--';
 $state-prefix: 'is-';
 
-/* BEM support Func
- -------------------------- */
+/* BEM support Func */
 @function selectorToString($selector) {
     $selector: inspect($selector);
     $selector: str-slice($selector, 2, -2);
     @return $selector;
 }
-
+// 判断 父级 是否包含'--'
 @function containsModifier($selector) {
     $selector: selectorToString($selector);
 
@@ -22,7 +21,7 @@ $state-prefix: 'is-';
         @return false;
     }
 }
-
+// 判断 父级 是否包含'.is-'
 @function containWhenFlag($selector) {
     $selector: selectorToString($selector);
 
@@ -32,7 +31,7 @@ $state-prefix: 'is-';
         @return false;
     }
 }
-
+// 判断 父级 是否包含 ':'
 @function containPseudoClass($selector) {
     $selector: selectorToString($selector);
 
@@ -50,13 +49,13 @@ $state-prefix: 'is-';
 /* BEM
 -------------------------- */
 @mixin b($block) {
-    $B: $namespace + '-' + $block !global;
+    $B: $namespace + '-' + $block !global; // 变量拼接形成对应格式的class；再使用!global将其提升为全局变量
 
     .#{$B} {
-        @content;
+        @content; // 使用混合；大括号后定义的样式将都会解析到这里
     }
 }
-
+// 定义混合
 @mixin e($element) {
     $E: $element !global;
     $selector: &;

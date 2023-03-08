@@ -11,10 +11,10 @@
             </div>
             <template #dropdown>
                 <el-dropdown-menu>
-                    <el-dropdown-item icon="Back" @click="close('Left')"> 关闭左侧 </el-dropdown-item>
-                    <el-dropdown-item icon="Right" @click="close('Right')"> 关闭右侧 </el-dropdown-item>
-                    <el-dropdown-item icon="Close" @click="close('Other')"> 关闭其他 </el-dropdown-item>
-                    <el-dropdown-item icon="CircleClose" @click="close('All')" divided> 关闭全部 </el-dropdown-item>
+                    <el-dropdown-item icon="back" @click="close('Left')"> 关闭左侧 </el-dropdown-item>
+                    <el-dropdown-item icon="right" @click="close('Right')"> 关闭右侧 </el-dropdown-item>
+                    <el-dropdown-item icon="close" @click="close('Other')"> 关闭其他 </el-dropdown-item>
+                    <el-dropdown-item icon="circleClose" @click="close('All')" divided> 关闭全部 </el-dropdown-item>
                 </el-dropdown-menu>
             </template>
         </el-dropdown>
@@ -43,12 +43,10 @@ watch(
     { immediate: true }
 );
 // 选中当前标签
-function clickTab() {
-    nextTick(() => {
-        const index = menuTabsList.findIndex((item) => item.meta.title === $vm.$store.user.activeMenuTab);
-        const { path, query } = menuTabsList[index];
-        $vm.$router.push({ path, query });
-    });
+function clickTab(data) {
+    const index = menuTabsList.findIndex((item) => item.meta.title === data.props.name);
+    const { path, query } = menuTabsList[index];
+    $vm.$router.push({ path, query });
 }
 // 关闭当前标签
 function removeTab(name) {
@@ -58,7 +56,7 @@ function removeTab(name) {
     menuTabsList.splice(index, 1);
     const data = menuTabsList[last ? index - 1 : index];
     $vm.$store.user.activeMenuTab = data?.meta?.title;
-    $vm.$router.push(data.path);
+    $vm.$router.push({ path: data.path, query: data.query });
 }
 function close(type) {
     const i = menuTabsList.findIndex((item) => item.meta.title === $vm.$store.user.activeMenuTab);
@@ -79,7 +77,7 @@ function close(type) {
     });
     if (type === 'All') {
         $vm.$store.user.activeMenuTab = menuTabsList[0].meta.title;
-        $vm.$router.push(menuTabsList[0].path);
+        $vm.$router.push({ path: menuTabsList[0].path, query: menuTabsList[0].query });
     }
 }
 // 添加新的菜单项
@@ -104,21 +102,27 @@ $--height: 40px;
 .tabs {
     width: 100%;
     display: flex;
-    box-sizing: border-box;
+    height: $--height;
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.1);
     .el-dropdown-link {
+        border-left: 1px solid var(--system-header-border-color);
         height: $--height;
         line-height: $--height;
         text-align: center;
         width: 40px;
+        i {
+            color: var(--system-header-text-color);
+        }
     }
 
     :deep() {
-        .el-tabs {
-            --el-tabs-header-height: var($--height - 1px);
-        }
         .el-tabs__nav-next,
         .el-tabs__nav-prev {
             line-height: $--height !important;
+            color: var(--system-header-text-color) !important;
+        }
+        .el-tabs--card > .el-tabs__header .el-tabs__nav {
+            border-left: none;
         }
     }
 }
@@ -129,12 +133,13 @@ $--height: 40px;
     :deep() {
         .el-tabs__header {
             margin: 0px;
-            border-bottom: none;
         }
         .el-tabs--card > .el-tabs__header .el-tabs__nav {
             border-top: none;
             border-radius: 0;
-            border-left: none;
+            .el-tabs__item {
+                height: $--height;
+            }
         }
     }
     :deep(.el-scrollbar__bar.is-vertical) {

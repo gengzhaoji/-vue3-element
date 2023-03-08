@@ -1,5 +1,5 @@
 <template>
-    <el-table ref="myTable" :class="['my-table', { 'flex-grow-1': fit }]" :data="tableData" :size="$store.user.size" v-bind="tableOptions" :key="i">
+    <el-table ref="myTable" :class="['my-table', { 'flex-grow-1': fit }]" :data="tableData" :size="$store.user.size" v-bind="$attrs">
         <template v-for="col in displayColumns" :key="`${col.prop}-${col.type}`">
             <!-- col 没有children 属性 -->
             <el-table-column v-if="!col.children" resizable v-bind="col">
@@ -17,9 +17,9 @@
             <!-- col 有children 属性， 直接返回slot插槽 -->
             <slot v-else :name="col.prop" :column="col"></slot>
         </template>
-        <el-table-column v-if="columnFilter" :resizable="false" width="26px" align="center" class-name="my-table--not-drag" fixed="right">
+        <el-table-column v-if="columnFilter" prop="ColumnFilter" :resizable="false" width="26px" align="center" class-name="my-table--not-drag" fixed="right">
             <template #header>
-                <ColumnFilter :columns="initColumns" v-model="displayColumnProps" @column-change-confirm="colChangeConfirm" />
+                <column-filter :columns="initColumns" v-model="displayColumnProps" @column-change-confirm="colChangeConfirm" @filterResetClick="filterResetClick" />
             </template>
         </el-table-column>
         <!--暴露 el-table append 插槽-->
@@ -35,22 +35,23 @@
     </el-table>
 </template>
 
-<script setup name="myTable">
+<script setup name="MyTable">
+import ColumnFilter from './ColumnFilter.vue';
 /**
- * myTable 表格组件 报错问题为无法获取使用$props
+ * MyTable 表格组件 报错问题为无法获取使用$props
  * @module components/my-table
  */
 import Sortable from 'sortablejs';
-import { debounce } from '@/utils/util';
-import { insertAfter } from '@/utils/dom';
+import { debounce } from '../../utils/util';
+import { insertAfter } from '../../utils/dom';
 
 const emits = defineEmits(['column-change-confirm', 'on-column-sort', 'on-row-sort', 'on-reach-bottom', 'on-reach-top', 'on-scroll']),
     $attrs = useAttrs(),
     /**
      * 属性参数，完全继承 el-table参数，并有以下扩展参数
      * @property {Boolean} [fit = true] 是否占满父类
-     * @property {Array} [data = []] 表格行数据
      * @property {Array} [columns = []]  表格列定义，对象属性参数完全继承 el-table-column
+     * @property {Array} [initColumns = []]  表格列原始定义，对象属性参数完全继承 el-table-column，供table列的自定义功能重置使用
      * @property {Object | Boolean} [columnSortable = false] 是否启用列拖拽排序, 可以配置Sortable个性化参数
      * @property {Object | Boolean} [rowSortable = false] 是否启用行拖拽排序, 可以配置Sortable个性化参数
      * @property {Number} [distanceToButton = 50] 滚动到距离底部多少距离触发 on-reach-bottom 事件， table需要设置高度才有效
@@ -95,64 +96,103 @@ const emits = defineEmits(['column-change-confirm', 'on-column-sort', 'on-row-so
             type: Boolean,
             default: false,
         },
-    }),
-    tableOptions = computed(() => {
-        if (props.fit) return { height: 10, ...$attrs };
-        return { ...$attrs };
     });
 
 // 表格列定义数组
-let displayColumnProps = $ref([]),
+let displayColumnProps = ref([]),
     // 原始表格数据
-    columnsProxy = $ref([]),
+    columnsProxy = [],
     // 表格行数据
-    tableData = $ref({}),
+    tableData = ref({}),
     // 列拖拽Sortable实例
-    columnSortableInstance = $ref(null),
+    columnSortableInstance = null,
     // 行拖拽Sortable实例
-    rowSortableInstance = $ref(null),
+    rowSortableInstance = null,
     // 上次滚动的位置
-    lastScrollTop = $ref(0),
-    // 处理树形表格数据不响应问题
-    i = $ref(1);
-
+    lastScrollTop = 0;
+/**
+ * 监听表格数据
+ */
 watch(
     () => props.data,
     (val) => {
-        if (!!$attrs['row-key']) i++;
-        tableData = val;
+        tableData.value = val;
     },
     { immediate: true }
 );
+/**
+ * 监听表格column列数据
+ */
 watch(
     () => props.columns,
     (val) => {
         columnsProxy = [...val];
         resetDisplayColumns();
     },
-    { immediate: true }
+    { immediate: true, deep: true }
 );
-watch(displayColumnProps, (val) => {
-    props.columns.forEach((item) => {
-        if (!(item.type || !item.prop)) {
-            // 默认为显示修改
-            if (val.includes(item.prop)) {
-                if (item.display === false) delete item.display;
-            } else {
-                item.display = false;
+/**
+ * 监听表头显示列的数据，从而改变原始props.columns的display值
+ */
+watch(
+    () => displayColumnProps.value,
+    (val) => {
+        props.columns.forEach((item) => {
+            if (!(item.type || !item.prop)) {
+                // 默认为显示修改
+                if (val.includes(item.prop)) {
+                    if (item.display === false) delete item.display;
+                } else {
+                    item.display = false;
+                }
             }
-        }
-    });
-});
-
+        });
+    }
+);
+/**
+ * 实际表格渲染的列数组
+ */
 const displayColumns = computed(() =>
     columnsProxy.filter((col) => {
         // 有type的字段 或 没设置属性名称的列固定显示
         if (col.type || !col.prop) return true;
-        return displayColumnProps.includes(col.prop);
+        return displayColumnProps.value.includes(col.prop);
     })
 );
-
+/**
+ * 计算表头显示的列prop数组值
+ */
+function resetDisplayColumns() {
+    displayColumnProps.value = columnsProxy
+        .filter((col) => {
+            if (!col.prop || col.type) return false;
+            return col.display !== false;
+        })
+        .map((col) => col.prop);
+}
+/**
+ * 自定义表头重置逻辑
+ */
+function filterResetClick() {
+    props.columns.forEach((item, i) => {
+        const { width, display } = props?.initColumns[i];
+        if (width) {
+            item.width = width;
+        } else {
+            delete item.width;
+        }
+        if (!!display) {
+            item.display = display;
+        } else {
+            delete item.display;
+        }
+    });
+}
+/**
+ * 表格的多层字段值显示函数
+ * @param {*} row
+ * @param {*} key
+ */
 function valueFn(row, key) {
     let keyArray = key?.split('.') || [],
         data = '';
@@ -165,21 +205,14 @@ function valueFn(row, key) {
     });
     return data;
 }
-function resetDisplayColumns() {
-    displayColumnProps = columnsProxy
-        .filter((col) => {
-            if (!col.prop || col.type) return false;
-            return col.display !== false;
-        })
-        .map((col) => col.prop);
-}
+
+/**
+ * 列表筛选点击确定时触发
+ * @event column-change-confirm
+ * @param {Array[]} columnPropNames
+ */
 function colChangeConfirm() {
-    /**
-     * 列表筛选点击确定时触发
-     * @event column-change-confirm
-     * @param {Array[]} columnPropNames
-     */
-    emits('column-change-confirm', displayColumnProps);
+    emits('column-change-confirm', displayColumnProps.value);
 }
 /**
  * 内部调用排序方法，还原由Sortable拖拽改变的DOM顺序，然后修改数据，再由数据驱动改变DOM
@@ -213,9 +246,9 @@ function sort(type, container, data, e) {
             columnsProxy = tempData;
         });
     } else {
-        tableData = [];
+        tableData.value = [];
         nextTick(() => {
-            tableData = tempData;
+            tableData.value = tempData;
         });
     }
 }
@@ -262,14 +295,14 @@ function initRowSortable() {
         props.rowSortable,
         {
             onSort: (e) => {
-                sort('row', tbody, tableData, e);
+                sort('row', tbody, tableData.value, e);
                 /**
                  * 行拖拽排序完成时触发
                  * @event on-row-sort
                  * @param {object} e Sortable事件对象
                  * @param {Array} data 行数据
                  */
-                emits('on-row-sort', e, tableData);
+                emits('on-row-sort', e, tableData.value);
             },
         }
     );
@@ -307,13 +340,13 @@ function handleScroll(e) {
     emits('on-scroll', e);
 }
 
-const myTable = $ref(null);
+const myTable = ref(null);
 let proxyHandleScroll, bodyWrapper;
 onMounted(() => {
     props.columnSortable && initColumnSortable();
     props.rowSortable && initRowSortable();
     proxyHandleScroll = debounce(handleScroll, 20, false);
-    bodyWrapper = myTable.$refs.bodyWrapper.querySelector('.el-scrollbar .el-scrollbar__wrap');
+    bodyWrapper = unref(myTable).$refs.bodyWrapper.querySelector('.el-scrollbar .el-scrollbar__wrap');
     bodyWrapper.addEventListener('scroll', proxyHandleScroll);
 });
 onBeforeUnmount(() => {

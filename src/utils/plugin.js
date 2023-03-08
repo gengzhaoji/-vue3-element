@@ -3,13 +3,14 @@
  * @module utils/plugin
  */
 import { ElInfiniteScroll, ElLoading, ElMessage, ElMessageBox, ElNotification } from 'element-plus';
-import * as ElIcons from '@element-plus/icons';
+import * as ElIcons from '@element-plus/icons-vue';
 import draggable from './directives/draggable';
 import hasPermi from './directives/hasPermi';
 import waterMarker from './directives/waterMarker';
 import waves from './directives/waves';
-import loadmore from './directives/loadmore';
 import clipboard from './directives/clipboard';
+import showTip from './directives/showTip';
+
 import { clone, cloneDeep } from '@u/convert';
 import { selectDictLabel, addDateRange } from '@u/util';
 const plugins = [ElInfiniteScroll, ElLoading, ElMessage, ElMessageBox, ElNotification];
@@ -20,77 +21,78 @@ import Guarder from '@s/guarder';
 import User from '@s/user';
 
 export default {
-    install: function (App, options) {
+    install: function (app, options) {
         plugins.forEach((plugin) => {
-            App.use(plugin);
+            app.use(plugin);
         });
         for (const name in ElIcons) {
             /*
              * 以elIcon为前缀的命名规则，是为了适配已经使用属性名添加图标的内置组件，
              * 例如：<el-button icon="el-icon-refresh"></el-button>
              */
-            // App.component('elIcon' + name, ElIcons[name]);
-            App.component(name, ElIcons[name]);
+            // app.component('elIcon' + name, ElIcons[name]);
+            app.component(name, ElIcons[name]);
         }
         /**
          * 全局指令
          */
-        App.directive('draggable', draggable);
-        App.directive('hasPermi', hasPermi);
-        App.directive('waterMarker', waterMarker);
-        App.directive('waves', waves);
-        App.directive('loadmore', loadmore);
-        App.directive('clipboard', clipboard);
+        app.directive('draggable', draggable);
+        app.directive('hasPermi', hasPermi);
+        app.directive('waterMarker', waterMarker);
+        app.directive('waves', waves);
+        app.directive('clipboard', clipboard);
+        app.directive('showTip', showTip);
         /**
          * 原型链全局挂载方法
          */
-        App.config.globalProperties.msgSuccess = function (msg) {
+        app.config.globalProperties.msgSuccess = function (msg) {
             ElMessage({ showClose: true, message: msg, type: 'success' });
         };
 
-        App.config.globalProperties.msgError = function (msg) {
+        app.config.globalProperties.msgError = function (msg) {
             ElMessage({ showClose: true, message: msg, type: 'error' });
         };
 
-        App.config.globalProperties.msgInfo = function (msg) {
+        app.config.globalProperties.msgInfo = function (msg) {
             ElMessage.info(msg);
         };
 
-        App.config.globalProperties.resetForm = function (refName) {
+        app.config.globalProperties.resetForm = function (refName) {
             if (refName) {
                 // 不是公用的my-form标签的ref逻辑
                 refName?.resetFields?.() || refName?.$refs?.refMyForm?.resetFields?.();
             }
         };
 
-        App.config.globalProperties.$store = {
+        app.config.globalProperties.$store = {
             com: Com(),
             dict: Dict(),
             guarder: Guarder(),
             user: User(),
         };
 
-        App.config.globalProperties.clone = clone;
+        app.config.globalProperties.clone = clone;
 
-        App.config.globalProperties.cloneDeep = cloneDeep;
+        app.config.globalProperties.cloneDeep = cloneDeep;
 
-        App.config.globalProperties.selectDictLabel = selectDictLabel;
+        app.config.globalProperties.selectDictLabel = selectDictLabel;
 
-        App.config.globalProperties.addDateRange = addDateRange;
+        app.config.globalProperties.addDateRange = addDateRange;
 
         /**
          * vite动态加载图片静态文件
          * @param {string} path 文件路径
-         * @param {string} suffix 文件类型（后缀）只能为svg、png、jpg，默认为svg
          * @returns
          */
-        App.config.globalProperties.getImgUrl = (path, suffix = 'svg') => {
-            if (suffix === 'svg') return import.meta.globEager('../assets/img/**/*.svg')[path].default;
-            if (suffix === 'png') return import.meta.globEager('../assets/img/**/*.png')[path].default;
-            if (suffix === 'jpg') return import.meta.globEager('../assets/img/**/*.jpg')[path].default;
-        };
+        const modules = import.meta.glob('../assets/img/**/*', { eager: true });
+        app.config.globalProperties.getImgUrl = (path) => modules[path].default;
 
-        App.config.globalProperties.$$confirm = function (data) {
+        /**
+         * 公用$$confirm提示函数
+         * @param {string/object} data
+         * @returns
+         */
+        app.config.globalProperties.$$confirm = function (data) {
             let options = {};
             if (typeof data === 'string') {
                 options.item = data;

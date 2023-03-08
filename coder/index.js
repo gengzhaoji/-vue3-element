@@ -273,16 +273,6 @@ function writeIconData() {
     const items = matches.map(function (item) {
         return item.replace('.icon-', 'icon-').replace(':', '');
     });
-
-    // element-ui icon
-    // const elIconCssFile = config.elIconCssFile || '../node_modules/element-ui/packages/theme-chalk/lib/icon.css';
-    // content = fs.readFileSync(path.join(__dirname, elIconCssFile), { encoding: 'utf-8' });
-    // regex = /.el-icon-[\w-_]+:/g;
-    // matches = content.match(regex);
-    // const elItems = matches.map(function (item) {
-    //     return item.replace('.el-', 'el-').replace(':', '');
-    // });
-    // const fileContent = iconsRender({ data: stringify([...items, ...elItems]) });
     const fileContent = iconsRender({ data: stringify([...items]) });
     try {
         fs.unlinkSync(path.join(__dirname, config.outIconFile));

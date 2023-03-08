@@ -32,7 +32,7 @@
         <!-- 上传的文件列表 -->
         <div v-if="fileList.length" class="fileList">
             <transition-group name="fade-transform" mode="out-in" appear>
-                <div class="fileList_item" v-for="(file, index) in fileList" :key="file.id + index" @click.prevent="previewFn(file, index)">
+                <div class="fileList_item" v-for="(file, index) in fileList" :key="file.id" @click.prevent="previewFn(file, index)">
                     <Files style="height: 1em; margin-right: 8px; margin-top: 3px" />
                     <el-tooltip :content="`${file.fileName}${file.fileSuffix}`" placement="top" :disabled="isDisabled">
                         <span class="name flex" v-if="editIndex === index">
@@ -68,7 +68,7 @@
         </div>
         <!-- 图片预览 -->
         <el-dialog v-model="dialogVisible" title="图片预览">
-            <img style="max-height: 500px; max-width: 500px; display: block; margin: 0 auto" :src="dialogImageUrl" alt />
+            <el-image :src="dialogImageUrl" fit="contain" preview-teleported />
         </el-dialog>
         <!-- PDF图片预览 -->
         <el-dialog v-model="dialogVisiblePdf" title="PDF图片预览" fullscreen>
@@ -77,7 +77,7 @@
     </div>
 </template>
 
-<script setup name="myFileUpload">
+<script setup name="MyFileUpload">
 /**
  * 请求接口
  */
@@ -92,12 +92,12 @@ const emits = defineEmits(['update:modelValue']),
     /***
      * props
      * @property {Array} modelValue v-model绑定的值，
-     * @property {Number} fileSize 上传文件大小的限制（默认为10M）
+     * @property {Number} fileSize 上传文件大小的限制（默认为100M）
      * @property {Array} fileType 可以上传的文件类型，默认为[]（就是不校验文件类型）
      * @property {Boolean} isShowTip 是否显示上传框的提示（默认为true）
      * @property {Boolean} download 是否允许下载文件（默认为true）
      * @property {Boolean} disabled 是否允许操作（上传文件等操作，如果不传默认按照form表单的disabled值）
-     * @property {Number} limit 上传附件数量
+     * @property {Number} limit 上传附件数量（默认为1）
      */
     props = defineProps({
         modelValue: [Array, String],
@@ -124,40 +124,46 @@ const emits = defineEmits(['update:modelValue']),
         },
     });
 // 文件上传弹窗数据
-let dialogImageUrl = $ref(''),
-    dialogVisible = $ref(false),
-    dialogVisiblePdf = $ref(false),
-    fileList = $ref([]),
-    editIndex = $ref(null),
-    isDisabled = $ref(true);
+let dialogImageUrl = ref(''),
+    dialogVisible = ref(false),
+    dialogVisiblePdf = ref(false),
+    editIndex = ref(null),
+    isDisabled = ref(true);
+
 // 是否显示提示
-let showTip = $computed(() => props.isShowTip && (props.fileType ?? props.fileSize)),
+let showTip = computed(() => props.isShowTip && (props.fileType ?? props.fileSize)),
     // 是否禁用上传功能
-    exportShow = $computed(() => props.disabled || elForm?.disabled);
+    exportShow = computed(() => props.disabled || elForm?.disabled),
+    fileList = computed(() => {
+        return (
+            props.modelValue.map((item) => ({
+                id: item.id,
+                downloadUrl: item.downloadUrl,
+                fileName: item.fileName,
+                fileSizeFormat: item.fileSizeFormat,
+                fileSize: item.fileSize,
+                fileSuffix: item.fileSuffix,
+            })) || []
+        );
+    });
+
 watch(
-    () => props.modelValue,
+    () => fileList,
     (val) => {
-        if (val)
-            fileList =
-                val?.map((item) => ({
-                    id: item.id,
-                    downloadUrl: item.downloadUrl,
-                    fileName: item.fileName,
-                    fileSizeFormat: item.fileSizeFormat,
-                    fileSize: item.fileSize,
-                    fileSuffix: item.fileSuffix,
-                })) || [];
-    },
-    { deep: true, immediate: true }
+        emits('update:modelValue', val);
+        elForm.validateField(elFormItem.prop);
+    }
 );
+
 // 文件超出个数限制时的钩子
-const attrs = useAttrs();
-let upload = $ref();
+const attrs = useAttrs(),
+    upload = ref(null);
+
 function exceedFn(files, fileList) {
-    upload.clearFiles();
+    unref(upload).clearFiles();
     const file = files[0];
     file.uid = genFileId();
-    upload.handleStart(file);
+    unref(upload).handleStart(file);
 }
 // 文件上传
 function handleChange(data) {
@@ -166,9 +172,9 @@ function handleChange(data) {
             let formdata = new FormData();
             formdata.append('file', data.raw);
             rdfileDataUpload(formdata).then((res) => {
-                if (props.limit === 1) fileList = [];
+                if (props.limit === 1) fileList.value = [];
                 nextTick(() => {
-                    fileList.push({
+                    fileList.value.push({
                         id: res.data.id,
                         downloadUrl: res.data.downloadUrl,
                         fileName: res.data.fileName.split('.')[0],
@@ -176,12 +182,10 @@ function handleChange(data) {
                         fileSize: res.data.fileSize,
                         fileSuffix: res.data.fileSuffix,
                     });
-                    updateFn();
                 });
             });
         } else {
-            if (props.limit === 1) fileList = [];
-            updateFn();
+            if (props.limit === 1) fileList.value = [];
         }
     }
 }
@@ -217,19 +221,18 @@ function handleBeforeUpload(file) {
 function editFn(file) {
     rdfileRename({ id: file.id, fileName: file.fileName }).then((res) => {
         $vm.msgSuccess('修改成功！');
-        emits('update:modelValue', fileList);
-        editIndex = null;
+        editIndex.value = null;
     });
 }
 // 文件预览
 function previewFn(file, index) {
-    if (editIndex !== index) {
+    if (editIndex.value !== index) {
         if (['.png', '.jpg', '.jpeg'].includes(file.fileSuffix)) {
-            dialogImageUrl = file.downloadUrl;
-            dialogVisible = true;
+            dialogImageUrl.value = file.downloadUrl;
+            dialogVisible.value = true;
         } else if (['.pdf'].includes(file.fileSuffix)) {
-            dialogVisiblePdf = true;
-            dialogImageUrl = file.downloadUrl;
+            dialogVisiblePdf.value = true;
+            dialogImageUrl.value = file.downloadUrl;
         }
     }
 }
@@ -241,27 +244,22 @@ function downloadFn(data) {
 function closeFn(index) {
     $vm.$$confirm('此操作将删除该数据, 是否继续?')
         .then(() => {
-            upload.clearFiles();
+            unref(upload).clearFiles();
             if (props.limit === 1) {
-                fileList = [];
+                fileList.value = [];
             } else {
-                const index = fileList.findIndex((item) => item.id === file.id);
-                fileList.splice(index, 1);
+                const index = fileList.value.findIndex((item) => item.id === file.id);
+                fileList.value.splice(index, 1);
             }
-            updateFn();
             $vm.msgSuccess('删除成功');
         })
         .catch(() => {
             $vm.msgInfo('已取消删除！');
         });
 }
-function updateFn() {
-    emits('update:modelValue', fileList);
-    elForm.validateField(elFormItem.prop);
-}
 // 文本超出出tip e.target.clientWidth; 文本可视宽度 e.target.scrollWidth; 文本实际宽度
 function isShowTootip(e) {
-    isDisabled = e.target.scrollWidth <= e.target.clientWidth;
+    isDisabled.value = e.target.scrollWidth <= e.target.clientWidth;
 }
 </script>
 

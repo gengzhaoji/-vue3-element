@@ -18,12 +18,12 @@ NProgress.configure({ showSpinner: false });
  * 获取版本号
  */
 import versionTood from './versionUpdate';
-import { ElMessage } from 'element-plus';
+import { TITLE } from '@/config';
 
 /**
  * 白名单
  */
-export const whiteList = ['/login'];
+export const whiteList = ['/login', '/x6'];
 
 export default function (router) {
     /**
@@ -34,6 +34,7 @@ export default function (router) {
         if (isExternal(to.path)) {
             window.open(to.path, '_block');
         } else {
+            document.title = TITLE || to.meta.title;
             // 缓存页面
             if (to.meta?.keepAlive && !guarder().cachedComponents.includes(to.name)) {
                 guarder().cachedComponents.push(to.name);
@@ -51,33 +52,24 @@ export default function (router) {
             versionTood();
             const store = user();
             // 联合登陆功能添加token
-            if (to.query.pputoken) {
-                store.token = to.query.pputoken;
-                store.une = to.query.une;
+            if (to.query.uid) {
+                store.token = to.query.pputoken || store.token;
+                store.uid = to.query.uid;
                 to.query = {};
             }
-            if (store.token) {
+            if (store.token || store.uid) {
                 /** 已经登录了存在token */
                 if (!store.rolesGets.length) {
                     // 判断当前用户是否已拉取完user_info信息
-                    store
-                        .GetInfo()
-                        .then((res) => {
-                            guarder()
-                                .GenerateRoutes()
-                                .then(() => {
-                                    next({ ...to, replace: false }); // hack方法 确保addRoutes已完成
-                                });
-                        })
-                        .catch(() => {
-                            store.LogOut().then(() => {
-                                next({
-                                    path: '/login',
-                                });
+                    store.GetInfo().then((res) => {
+                        guarder()
+                            .GenerateRoutes()
+                            .then(() => {
+                                next({ ...to, replace: false }); // hack方法 确保addRoutes已完成
                             });
-                        });
+                    });
                 } else {
-                    next(); // hack方法 确保addRoutes已完成
+                    next();
                 }
             } else {
                 // 没有token

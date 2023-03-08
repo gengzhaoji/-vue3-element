@@ -1,6 +1,6 @@
-import myListPanel from './my-list-panel.vue';
+import MyListPanel from './my-list-panel.vue';
 
-myListPanel.install = function (Vue) {
-    Vue.component(myListPanel.name, myListPanel);
+MyListPanel.install = function (Vue) {
+    Vue.component('MyListPanel', MyListPanel);
 };
-export default myListPanel;
+export default MyListPanel;

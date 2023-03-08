@@ -6,12 +6,12 @@
             :defaultConfig="editorConfig"
             v-model="modelContent"
             @onCreated="handleCreated"
-            style="border: 1px solid var(--el-border-color); border-top: 0; height: 300px"
+            :style="{ border: '1px solid var(--el-border-color)', 'border-top': 0, height }"
         />
     </div>
 </template>
 
-<script setup name="myEditor">
+<script setup name="MyEditor">
 import { formContextKey as elFormKey, formItemContextKey as elFormItemKey } from 'element-plus';
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
 import { h } from 'snabbdom';
@@ -268,13 +268,13 @@ const editorId = `w-e-${Math.random().toString().slice(-5)}`,
             ],
         ],
     },
-    $emit = defineEmits(['update:modelValue', 'on-change', 'blur', 'focus', 'ready']),
+    $emit = defineEmits(['update:modelValue', 'on-change']),
     elForm = inject(elFormKey, {}),
     elFormItem = inject(elFormItemKey, {}),
     $vm = inject('$vm'),
     /**
      * 属性参数
-     * @property {string} [value] 编辑器值
+     * @property {string} [modelValue] 编辑器值
      * @property {string|array} [toolbar=classic] 工具条，支持：simple、classic、document
      * @property {Object} [config] CKEditor 实例化配置参数
      * @property {String} [height] 编辑器高度，如果不设置，即根据输入内容适应
@@ -296,6 +296,10 @@ const editorId = `w-e-${Math.random().toString().slice(-5)}`,
         // 编辑器配置
         config: {
             type: Object,
+        },
+        height: {
+            type: String,
+            default: '300px',
         },
     }),
     readonly = computed(() => useAttrs().disabled ?? elForm?.disabled),

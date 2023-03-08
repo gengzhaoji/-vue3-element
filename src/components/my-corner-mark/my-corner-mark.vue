@@ -15,15 +15,15 @@ import { guid } from '@u/util';
 /**
  * 插槽
  * @member slots
- * @property {string} default 内容
+ * @property {String} default 内容
  */
 const MyCornerMarkId = `MyCornerMarkId${guid()}`,
     /**
      *属性参数
      * @member props
-     * @property {string} [type=primary] 颜色，支持'primary', 'success', 'warning', 'danger','info'
-     * @property {string} [size] 尺寸，支持 'large', '', 'small',
-     * @property {string} [target] 添加到目标的选择器
+     * @property {String} [type=primary] 颜色，支持'primary', 'success', 'warning', 'danger','info'
+     * @property {String} [size] 尺寸，支持 'large', '', 'small',
+     * @property {String, HTMLElement} [target] 添加到目标的选择器
      */
     props = defineProps({
         type: {
@@ -40,7 +40,7 @@ const MyCornerMarkId = `MyCornerMarkId${guid()}`,
                 return ['large', '', 'small'].includes(val);
             },
         },
-        target: [String, HTMLElement],
+        target: [String],
     });
 const classes = computed(() => ({
     [`is-${props.size}`]: !!props.size,

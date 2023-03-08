@@ -1,6 +1,6 @@
-import MyPanel from './my-panel2.vue';
+import MyPanel from './my-panel.vue';
 
 MyPanel.install = function (Vue) {
-    Vue.component(MyPanel.name, MyPanel);
+    Vue.component('MyPanel', MyPanel);
 };
 export default MyPanel;

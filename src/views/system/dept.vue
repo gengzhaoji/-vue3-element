@@ -20,32 +20,43 @@
             />
         </div>
         <div class="f1 h0 flex-col system-page-background m-t-10 b-r-4">
-            <div class="p-10" v-hasPermi="['system:dep:add']">
-                <my-button type="primary" icon="Plus" @click.prevent="Add" v-hasPermi="['system:dep:add']"> 新 增 </my-button>
+            <div class="p-10" v-hasPermi="['system:dept:add']">
+                <my-button type="primary" icon="Plus" @click.prevent="Add" v-hasPermi="['system:dept:add']"> 新 增 </my-button>
             </div>
             <div class="f1 h0 flex-col">
                 <my-table
+                    ref="table"
                     :data="state.list"
                     :columns="state.columns"
                     row-key="id"
                     lazy
-                    :load="(tree, treeNode, resolve) => resolve(tree.children)"
-                    :expand-row-keys="expandRowkeys"
-                    @expand-change="expandChangeFn"
+                    :load="
+                        (tree, treeNode, resolve) => {
+                            loadFnResolve.add(tree.id);
+                            resolve(tree.children);
+                        }
+                    "
+                    @row-click="
+                        (row, column, event) => {
+                            event.currentTarget?.querySelector('.el-table__expand-icon')?.click();
+                        }
+                    "
                 >
                     <template #status="{ row }">
-                        <el-switch v-model="row.status" inline-prompt :active-value="0" :inactive-value="1" active-text="启" inactive-text="停" @change="statusFn(row)" />
+                        <div @click.stop="">
+                            <el-switch v-model="row.status" inline-prompt :active-value="0" :inactive-value="1" active-text="启" inactive-text="停" @change="statusFn(row)" />
+                        </div>
                     </template>
                     <template #default="{ row }">
-                        <my-button-text @click="Update(row)" v-hasPermi="['system:dep:edit']"> 修改 </my-button-text>
-                        <my-button-text @click="Add(row)" v-hasPermi="['system:dep:add']"> 新增 </my-button-text>
-                        <my-button-text @click="Delete(row)" v-hasPermi="['system:dep:remove']" v-if="!row.children.length"> 删除 </my-button-text>
+                        <my-button-text @click.stop="Update(row)" v-hasPermi="['system:dept:edit']"> 修改 </my-button-text>
+                        <my-button-text @click.stop="Add(row)" v-hasPermi="['system:dept:add']"> 新增 </my-button-text>
+                        <my-button-text v-if="!row.children.length" @click.stop="Delete(row)" v-hasPermi="['system:dept:remove']"> 删除 </my-button-text>
                     </template>
                 </my-table>
             </div>
         </div>
         <!-- 添加或修改部门对话框 -->
-        <el-dialog :title="dialog.title" v-model="dialog.open" width="600px" append-to-body @close="resetForm(dialogForm)">
+        <el-dialog :title="dialog.title" v-model="dialog.open" width="600px" append-to-body @closed="resetForm(dialogForm)">
             <el-form ref="dialogForm" :model="dialog.form" :rules="rules" label-width="80px" class="validate--bottom">
                 <el-row>
                     <el-col :span="24" v-if="dialog.form.parentId !== '0'">
@@ -92,7 +103,7 @@
                     <el-col :span="12">
                         <el-form-item label="部门状态" prop="status">
                             <el-radio-group v-model="dialog.form.status">
-                                <el-radio v-for="dict in $store.dict.sysNormalDisable" :key="dict.dictValue" :label="dict.dictValue * 1">
+                                <el-radio v-for="dict in $store.dict.sysNormalDisable" :key="dict.dictValue * 1" :label="dict.dictValue * 1">
                                     {{ dict.dictLabel }}
                                 </el-radio>
                             </el-radio-group>
@@ -101,17 +112,17 @@
                 </el-row>
             </el-form>
             <template #footer>
-                <div class="dialog-footer">
-                    <my-button type="primary" @click="submitForm()"> 确 定 </my-button>
-                    <my-button @click="dialog.open = false">取 消</my-button>
-                </div>
+                <my-button @click="dialog.open = false">取 消</my-button>
+                <my-button type="primary" @click="submitForm()">确 定</my-button>
             </template>
         </el-dialog>
     </div>
 </template>
 
 <script setup name="dept">
-import { addDept, removeDept, editDept, infoDept, pageDept } from '@/api/system';
+import { find } from '@u/tree';
+import { addDept, removeDept, editDept, listDept } from '@/api/system';
+
 let deptOptions = $ref([]),
     // 查询参数
     queryParams = $ref({
@@ -198,21 +209,17 @@ let deptOptions = $ref([]),
     };
 const $vm = inject('$vm');
 
-// 树形表格展开问题
-let expandRowkeys = $ref([]);
-function expandChangeFn(row, expanded) {
-    if (expanded) {
-        expandRowkeys.push(row.id);
-    } else {
-        expandRowkeys.splice(expandRowkeys.indexOf(row.id), 1);
-    }
-}
-
 /** 查询部门列表 */
+let loadFnResolve = new Set(),
+    table = $ref(null);
 function getList() {
-    pageDept(queryParams).then((res) => {
-        state.list = res.data.rows;
+    listDept(queryParams).then((res) => {
+        state.list = res.data;
+        deptOptions = res.data;
         $vm.$store.com.deptTree = [];
+        for (let key of loadFnResolve.keys()) {
+            table.$refs.myTable.store.states.lazyTreeNodeMap.value[key] = find(res.data, true, (item) => item.id === key).children;
+        }
     });
 }
 /**
@@ -238,21 +245,13 @@ function Add(row) {
     dialog.open = true;
     dialog.form.id = undefined;
     dialog.title = '添加部门';
-    pageDept().then((res) => {
-        deptOptions = res.data.rows;
-    });
 }
 /** 修改按钮操作 */
 function Update(row) {
-    infoDept({ id: row.id }).then((res) => {
-        dialog.open = true;
-        dialog.title = '修改部门';
-        nextTick(() => {
-            dialog.form = res.data;
-        });
-    });
-    pageDept().then((res) => {
-        deptOptions = res.data.rows;
+    dialog.open = true;
+    dialog.title = '修改部门';
+    nextTick(() => {
+        dialog.form = $vm.clone(row);
     });
 }
 const dialogForm = $ref(null);

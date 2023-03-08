@@ -94,10 +94,6 @@ html.dark#major {
     --el-menu-border-color: #ffffff26;
 }
 
-.el-menu .el-menu-item.is-active {
-    background-color: var(--el-menu-active-bg-color, var(--el-menu-hover-bg-color)) !important;
-}
-
 // 进度条颜色修改为主题色
 body #nprogress .bar {
     background-color: var(--el-color-primary) !important;
@@ -108,8 +104,4 @@ body #nprogress .peg {
 body #nprogress .spinner-icon {
     border-top-color: var(--el-color-primary) !important;
     border-left-color: var(--el-color-primary) !important;
-}
-
-.el-table {
-    // --el-table-header-background-color: var(--system-header-table-background) !important;
 }

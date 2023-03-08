@@ -1,6 +1,6 @@
-import myPrint from './xdh-print.vue';
+import MyPrint from './my-print.vue';
 
-myPrint.install = function (Vue) {
-    Vue.component(myPrint.name, myPrint);
+MyPrint.install = function (Vue) {
+    Vue.component('MyPrint', MyPrint);
 };
-export default myPrint;
+export default MyPrint;

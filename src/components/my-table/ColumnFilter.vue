@@ -19,7 +19,7 @@
 </template>
 
 <script setup name="ColumnFilter">
-const emits = defineEmits(['update:modelValue', 'column-change-confirm']),
+const emits = defineEmits(['update:modelValue', 'column-change-confirm', 'filterResetClick']),
     props = defineProps({
         columns: {
             type: Array,
@@ -41,8 +41,9 @@ const emits = defineEmits(['update:modelValue', 'column-change-confirm']),
             type: Boolean,
             default: true,
         },
-    }),
-    checkboxList = computed(() => props.columns.filter((col) => !!col.prop && !col.type)),
+    });
+
+let checkboxList = computed(() => props.columns.filter((col) => !!col.prop && !col.type)),
     fieldValue = computed({
         get() {
             return props.modelValue;
@@ -50,18 +51,12 @@ const emits = defineEmits(['update:modelValue', 'column-change-confirm']),
         set(val) {
             emits('update:modelValue', val);
         },
-    }),
-    modelValueProxy = props.columns
-        .filter((col) => {
-            if (!col.prop || col.type) return false;
-            return col.display !== false;
-        })
-        .map((col) => col.prop);
+    });
 
 function filterConfirmClick() {
     emits('column-change-confirm');
 }
 function filterResetClick() {
-    emits('update:modelValue', modelValueProxy);
+    emits('filterResetClick');
 }
 </script>

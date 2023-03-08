@@ -11,7 +11,7 @@
             </div>
 
             <div class="my-exception__actions">
-                <slot name="actions"> {{ time }}秒后自动<my-button text @click.prevent="backHome">返回</my-button>首页 </slot>
+                <slot name="actions"> {{ time }}秒后自动<my-button link type="primary" @click.prevent="backHome">返回</my-button>首页 </slot>
             </div>
         </div>
     </div>

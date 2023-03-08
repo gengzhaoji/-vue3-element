@@ -116,7 +116,7 @@
     </div>
 </template>
 
-<script setup name="my-process">
+<script setup name="MyProcess">
 import Modeler from 'bpmn-js/lib/Modeler';
 import FlowModeler from './flow';
 import BpmData from './BpmData';
@@ -418,8 +418,6 @@ function adjustPalette() {
                 }
             }
         }
-    } catch (e) {
-        console.log(e);
     }
 }
 function fillColor() {
@@ -511,7 +509,7 @@ async function saveXML(download = false) {
         }
         return xml;
     } catch (err) {
-        console.log(err);
+
     }
 }
 async function showXML() {
@@ -519,7 +517,7 @@ async function showXML() {
         const { xml } = await modeler.saveXML({ format: true });
         $emit('showXML', xml);
     } catch (err) {
-        console.log(err);
+
     }
 }
 async function saveImg(type = 'svg', download = false) {
@@ -530,7 +528,6 @@ async function saveImg(type = 'svg', download = false) {
         }
         return svg;
     } catch (err) {
-        console.log(err);
     }
 }
 async function save() {

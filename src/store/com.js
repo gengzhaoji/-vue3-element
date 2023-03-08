@@ -7,8 +7,7 @@ import { pageUser } from '@a/system';
 import { treeDchildren } from '@u/tree';
 import { getPost } from '@/api/public';
 
-export default defineStore({
-    id: 'com',
+export default defineStore('com', {
     state: () => ({
         deptTree: [],
         useList: [],

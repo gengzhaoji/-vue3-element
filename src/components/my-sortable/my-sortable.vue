@@ -1,5 +1,5 @@
 <template>
-    <div class="my-sortable" :id="Id">
+    <div class="my-sortable" ref="$el">
         <div v-for="(item, index) in list" :key="index" :data-id="index" v-bind="$attrs" class="my-sortable__item">
             <slot :item="item" :index="index">{{ item }}</slot>
         </div>
@@ -9,13 +9,11 @@
 <script setup name="MySortable">
 /**
  * 拖拽排序组件
- * @module /components/my-sortable
+ * @module components/my-sortable
  * @example
- *  http://www.sortablejs.com/index.html
  */
 import Sortable from 'sortablejs';
-import { insertAfter } from '@/utils/dom';
-import { guid } from '@u/util';
+import { insertAfter } from '@u/dom';
 
 /**
  * 插槽
@@ -25,11 +23,10 @@ import { guid } from '@u/util';
 /**
  * 属性参数
  * @member props
- * @property {Array} [data] 数据，支持 sync 修饰符
+ * @property {Array} [data] 数据
  * @property {object} [options] Sortablejs 参数选项
  */
 const $emit = defineEmits(['update:data', 'add', 'remove']),
-    Id = `MySortableId${guid()}`,
     props = defineProps({
         // 数据
         data: {
@@ -65,7 +62,10 @@ const $emit = defineEmits(['update:data', 'add', 'remove']),
             props.options?.onRemove?.();
         },
     }));
-let list = $ref([...props.data]);
+
+let list = ref([]),
+    sortable,
+    $el = ref(null);
 
 watch(
     () => sortableConfig.value,
@@ -77,43 +77,51 @@ watch(
 watch(
     () => props.data,
     (val) => {
-        list = val.slice(0);
+        list.value = [...val];
+    },
+    {
+        immediate: true,
     }
 );
-watch(list, () => {
-    nextTick(reset());
-});
+watch(
+    () => list.value,
+    () => {
+        nextTick(reset());
+    },
+    {
+        deep: true,
+    }
+);
 
-let sortable, $el;
 function sort(oldIndex, newIndex) {
-    const oldTemp = list[oldIndex];
-    list.splice(oldIndex, 1);
-    list.splice(newIndex, 0, oldTemp);
-    $emit('update:data', list.slice(0));
+    const oldTemp = list.value[oldIndex];
+    list.value.splice(oldIndex, 1);
+    list.value.splice(newIndex, 0, oldTemp);
+    $emit('update:data', list.value.slice(0));
 }
 function add(fromData, element, oldIndex, newIndex) {
     const newItem = fromData[oldIndex];
-    list.splice(newIndex, 0, newItem);
-    Array.from($el.children).forEach((el) => {
+    list.value.splice(newIndex, 0, newItem);
+    Array.from(unref($el).children).forEach((el) => {
         if (el === element) {
-            $el.removeChild(el);
+            unref($el).removeChild(el);
         }
     });
-    this.$emit('update:data', list.slice(0));
+    $emit('update:data', list.value.slice(0));
     /**
      * 新增时触发
      */
-    this.$emit('add', newItem, newIndex);
+    $emit('add', newItem, newIndex);
 }
 function remove(element, oldIndex) {
-    list.splice(oldIndex, 1);
-    const children = $el.children;
+    list.value.splice(oldIndex, 1);
+    const children = unref($el).children;
     if (children.length > 0) {
-        oldIndex > 0 ? insertAfter(element, children[oldIndex - 1]) : $el?.insertBefore(element, children[0]);
+        oldIndex > 0 ? insertAfter(element, children[oldIndex - 1]) : unref($el)?.insertBefore(element, children[0]);
     } else {
-        $el.appendChild(element);
+        unref($el).appendChild(element);
     }
-    $emit('update:data', this.list.slice(0));
+    $emit('update:data', list.value.slice(0));
     /**
      * 删除时触发
      */
@@ -123,21 +131,26 @@ function setOptions(opts) {
     sortable?.option?.(opts);
 }
 function reset() {
-    const order = list.map((n, index) => index.toString());
+    const order = list.value.map((n, index) => index.toString());
     sortable?.sort?.(order);
-    $el.__data__ = list;
+    unref($el).__data__ = list.value;
 }
 function init() {
     sortable?.destroy?.();
-    sortable = new Sortable($el, sortableConfig.value);
-    $el.__data__ = list;
+    sortable = new Sortable(unref($el), sortableConfig.value);
+    unref($el).__data__ = list.value;
 }
 onMounted(() => {
-    $el = document.getElementById(Id);
     init();
 });
 onBeforeUnmount(() => {
     sortable?.destroy?.();
-    $el.__data__ = null;
+    unref($el).__data__ = null;
 });
 </script>
+
+<style lang="scss" scoped>
+.blue-background {
+    background: #2c9dff !important;
+}
+</style>
